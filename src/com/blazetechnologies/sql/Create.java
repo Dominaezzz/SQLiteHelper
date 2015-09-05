@@ -73,7 +73,7 @@ public class Create extends SQL {
 	}
 
 	public enum TableContraints{
-
+		FOREIGN_KEY
 	}
 
 	public enum ColumnType{
