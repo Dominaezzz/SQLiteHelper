@@ -5,13 +5,18 @@ import java.util.ArrayList;
 /**
  * Created by Dominic on 04/09/2015.
  */
-public abstract class SQL {
+public class SQL {
 
-	StringBuilder builder;
-	ArrayList<Object> bindings;
+	protected StringBuilder builder;
+	protected ArrayList<Object> bindings;
 
-	SQL(){
+	protected SQL(){
 		builder = new StringBuilder();
+		bindings = new ArrayList<>();
+	}
+
+	protected SQL(String prefix){
+		builder = new StringBuilder(prefix);
 		bindings = new ArrayList<>();
 	}
 
@@ -21,6 +26,14 @@ public abstract class SQL {
 
 	public ArrayList<Object> getBindings(){
 		return bindings;
+	}
+
+	public static SQL raw(String... strings){
+		SQL sql = new SQL();
+		for (String string : strings){
+			sql.builder.append(string);
+		}
+		return sql;
 	}
 
 }

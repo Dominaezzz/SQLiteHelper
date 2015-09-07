@@ -326,7 +326,7 @@ public final class Condition {
         }
     }
 
-    String build(){
+    public String build(){
         return builder.toString();
     }
 
