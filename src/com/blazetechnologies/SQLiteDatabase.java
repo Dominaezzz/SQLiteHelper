@@ -1,8 +1,9 @@
 package com.blazetechnologies;
 
 import com.blazetechnologies.annotations.Column;
-import com.blazetechnologies.annotations.Table;
 import com.blazetechnologies.sql.Condition;
+import com.blazetechnologies.sql.Create;
+import com.blazetechnologies.sql.SQL;
 import com.sun.istack.internal.NotNull;
 
 import java.io.Closeable;
@@ -11,7 +12,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Date;
 
-import static com.blazetechnologies.sql.Query.*;
+import static com.blazetechnologies.sql.Query.select;
 
 /**
  * Created by Dominic on 27/08/2015.
@@ -72,10 +73,10 @@ public final class SQLiteDatabase implements Closeable{
     }
 
     public void createView(@NotNull String name, @NotNull String selectStatement){
-        createView(name, false, selectStatement);
+        createView(false, name, selectStatement);
     }
 
-    public void createView(@NotNull String name, boolean temporary, @NotNull String selectStatement){
+    public void createView(boolean temporary, @NotNull String name, @NotNull String selectStatement){
         if(Utils.isEmpty(selectStatement)){
             throw new NullPointerException("selectStatement can not be null or empty");
         }
@@ -83,49 +84,37 @@ public final class SQLiteDatabase implements Closeable{
             throw new NullPointerException("name can not be null or empty");
         }
 
-        execute("CREATE " + (temporary ? "TEMPORARY " : "") + " VIEW [" + name + "] AS " + selectStatement);
+		execute(
+				Create.view(temporary, name)
+				.as(selectStatement)
+		);
     }
 
     public void createIndex(String name, boolean unique, Class<Entity> table, String[] indexedColumns, String where){
-        String tableName = table.getSimpleName();
-        if(table.isAnnotationPresent(Table.class)){
-            tableName = table.getAnnotation(Table.class).Name();
-        }
+        String tableName = Entity.getEntityName(table);
         createIndex(name, unique, tableName, indexedColumns, where);
     }
 
     public void createIndex(String name, boolean unique, String table, String[] indexedColumns, String where){
-        StringBuilder builder = new StringBuilder("CREATE ");
-        if(unique){
-            builder.append("UNIQUE ");
-        }
-        builder.append("INDEX ");
-        builder.append('[').append(name).append(']');
-        builder.append(" ON ").append(table).append(" ");
-
-        builder.append('(');
-        for (int x = 0; x < indexedColumns.length; x++) {
-            builder.append(indexedColumns[x]);
-            if(x < indexedColumns.length - 1){
-                builder.append(", ");
-            }
-        }
-        builder.append(')');
-        if(!Utils.isEmpty(where)){
-            builder.append(" WHERE ").append(where);
-        }
-
-        execute(builder.toString());
+		execute(
+				Create.index(unique, name)
+				.on(table, indexedColumns)
+				.where(where)
+		);
     }
 
-    public void execute(String sql){
-        select("title", "artist").from(TestEntity.class)
-                .where(Condition.col("title").eq("blue jeans"))
-                .groupBy("artist")
-                .orderBy("artist")
-                .limit(1)
-                .build();
-    }
+	public void execute(String sql, Object... args){
+		select("title", "artist").from(TestEntity.class)
+				.where(Condition.col("title").eq("blue jeans"))
+				.groupBy("artist")
+				.orderBy("artist")
+				.limit(1)
+				.build();
+	}
+
+	public void execute(SQL sql){
+		execute(sql.build(), sql.getBindings());
+	}
 
     private static String getFieldType(Field field){
         Class<?> type = field.getType();

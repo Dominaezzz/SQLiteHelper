@@ -6,7 +6,7 @@ import java.util.Collections;
 /**
  * Created by Dominic on 28/08/2015.
  */
-public class Aggregate extends Query{
+public class Aggregate extends SQL{
 
     private Aggregate(String name, String query, Object[] bindings){
         builder = new StringBuilder(name).append('(').append(query).append(')');

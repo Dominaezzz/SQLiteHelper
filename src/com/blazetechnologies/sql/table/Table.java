@@ -6,7 +6,7 @@ import com.blazetechnologies.sql.SQL;
 /**
  * Created by Dominic on 07/09/2015.
  */
-public class Table {
+public class Table extends SQL{
 
 	private Table(){}
 
@@ -31,11 +31,11 @@ public class Table {
 	}
 
 	public static SQL dropOrThrow(String tableName){
-		return SQL.raw("DROP TABLE ", tableName);
+		return SQL.raw("DROP TABLE [", tableName, "]");
 	}
 
 	public static SQL drop(String tableName){
-		return SQL.raw("DROP TABLE IF EXISTS ", tableName);
+		return SQL.raw("DROP TABLE IF EXISTS [", tableName, "]");
 	}
 
 	public static class AlterTable{
@@ -46,11 +46,15 @@ public class Table {
 		}
 
 		public SQL renameTo(String newTableName){
-			return SQL.raw("ALTER TABLE ", tableName, " RENAME TO ", newTableName);
+			return SQL.raw("ALTER TABLE [", tableName, "] RENAME TO ", newTableName);
 		}
 
 		public SQL addColumn(String column_def){
-			return SQL.raw("ALTER TABLE ", tableName, " ADD COLUMN ", column_def);
+			return SQL.raw("ALTER TABLE [", tableName, "] ADD COLUMN ", column_def);
+		}
+
+		public SQL addColumn(ColumnDef column_def){
+			return addColumn(column_def.build());
 		}
 	}
 
@@ -76,7 +80,7 @@ public class Table {
 		}
 
 		public SQL as(String selectStatement){
-			return SQL.raw("CREATE ", temp? "TEMPORARY " : "", "TABLE AS ", selectStatement);
+			return SQL.raw("CREATE ", temp? "TEMPORARY " : "", "TABLE [", name, "] AS ", selectStatement);
 		}
 
 		public SQL as(Query query){
@@ -90,7 +94,7 @@ public class Table {
 			if(createTable.temp){
 				builder.append("TEMPORARY ");
 			}
-			builder.append("TABLE ").append(createTable.name).append("(");
+			builder.append("TABLE [").append(createTable.name).append("](");
 			for (int x = 0; x < column_defs.length; x++) {
 				builder.append(column_defs[x]);
 				if(x < column_defs.length - 1){

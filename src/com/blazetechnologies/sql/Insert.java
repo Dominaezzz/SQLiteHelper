@@ -11,56 +11,30 @@ public class Insert extends SQL{
 
 	private Insert(){}
 
-	public static Conflict orReplace(){
-		return new Conflict("REPLACE");
+	public static Into into(Conflict conflict, String tableName){
+		return new Into(conflict, tableName);
 	}
 
-	public static Conflict orIgnore(){
-		return new Conflict("IGNORE");
+	public static Into into(String tableName){
+		return into(null, tableName);
 	}
 
-	public static Conflict orAbort(){
-		return new Conflict("ABORT");
+	public static <E extends Entity> Into into(Conflict conflict, Class<E> table){
+		return into(conflict, Entity.getEntityName(table));
 	}
 
-	public static Conflict orFail(){
-		return new Conflict("FAIL");
-	}
-
-	public static Conflict orRollback(){
-		return new Conflict("ROLLBACK");
-	}
-
-	public static class Conflict extends Into {
-		Conflict(){
-			builder.append("INSERT INTO ");
-		}
-
-		Conflict(String onConflict){
-			builder.append("INSERT OR ").append(onConflict).append(" INTO ");
-		}
-
-		public Into into(String databaseName, String table){
-			builder.append(databaseName).append(".").append(table).append(" ");
-			return this;
-		}
-
-		public Into into(String tableName){
-			builder.append(tableName).append(" ");
-			return this;
-		}
-
-		public <E extends Entity> Into into(String databaseName, Class<E> table){
-			return into(databaseName, Entity.getEntityName(table));
-		}
-
-		public <E extends Entity> Into into(Class<E> table){
-			return into(Entity.getEntityName(table));
-		}
+	public static <E extends Entity> Into into(Class<E> table){
+		return into(null, table);
 	}
 
 	public static class Into extends Columns {
-		private Into(){}
+		private Into(Conflict conflict, String tableName){
+			builder.append("INSERT ");
+			if(conflict != null){
+				builder.append("OR ").append(conflict.name()).append(" ");
+			}
+			builder.append("INTO ").append(tableName).append(" ");
+		}
 
 		public Columns columns(String... columns){
 			if(columns.length > 0){
@@ -97,7 +71,7 @@ public class Insert extends SQL{
 	}
 
 	public static class Values extends Insert{
-		int valuesCount = 0;
+		private int valuesCount = 0;
 
 		private Values(){}
 
@@ -122,6 +96,9 @@ public class Insert extends SQL{
 			}else{
 				throw new UnsupportedOperationException("VALUES limit is 500");
 			}
+			builder.append(" ");
+
+			valuesCount++;
 			return this;
 		}
 	}

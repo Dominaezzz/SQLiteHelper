@@ -18,9 +18,75 @@ public class Query extends SQL{
         return select(false, columns);
     }
 
+	public static Values selectValues(Object... values){
+		return new Values().values(values);
+	}
+
+	public static Values selectValues(Query... values){
+		return new Values().values(values);
+	}
+
     private String buildSubQuery(){
         return "(" + builder.toString() + ")";
     }
+
+	public static class Values extends GroupBy{
+		int valuesCount;
+
+		private Values(){
+			valuesCount = 0;
+		}
+
+		public Values values(Object... values){
+			if(valuesCount > 0){
+				builder.append(", ");
+			}else{
+				builder.append("VALUES ");
+			}
+
+			if(valuesCount < 500){
+				builder.append("(");
+				for (int x = 0; x < values.length; x++) {
+					builder.append("?");
+					bindings.add(values[x]);
+					if(x < values.length - 1){
+						builder.append(", ");
+					}
+				}
+				builder.append(")");
+			}else{
+				throw new UnsupportedOperationException("VALUES limit is 500");
+			}
+			builder.append(" ");
+			valuesCount++;
+			return this;
+		}
+
+		public Values values(Query... values){
+			if(valuesCount > 0){
+				builder.append(", ");
+			}else{
+				builder.append("VALUES ");
+			}
+
+			if(valuesCount < 500){
+				builder.append("(");
+				for (int x = 0; x < values.length; x++) {
+					builder.append(values[x].buildSubQuery());
+					bindings.addAll(values[x].getBindings());
+					if(x < values.length - 1){
+						builder.append(", ");
+					}
+				}
+				builder.append(")");
+			}else{
+				throw new UnsupportedOperationException("VALUES limit is 500");
+			}
+			builder.append(" ");
+			valuesCount++;
+			return this;
+		}
+	}
 
     public static class Select extends From{
         private Select(boolean distinct, String... columns){
@@ -61,8 +127,9 @@ public class Query extends SQL{
                     builder.append('[').append(tableViewOrSubQuery).append(']');
                 }
             }else{
-                builder.append(tableViewOrSubQuery).append(" ");
+                builder.append(tableViewOrSubQuery);
             }
+            builder.append(" ");
             return this;
         }
     }
@@ -165,8 +232,64 @@ public class Query extends SQL{
         }
     }
 
+	public static class Compound{
+		private static final String UNION = "UNION";
+		private static final String UNION_ALL = "UNION ALL";
+		private static final String INTERSECT = "INTERSECT";
+		private static final String EXCEXPT = "EXCEPT";
+
+		private Query query;
+		private String operator;
+
+		private Compound(Query query, String operator){
+			this.query = query;
+			this.operator = operator;
+		}
+
+		public Select select(boolean distinct, String... columns){
+			Select select = Query.select(distinct, columns);
+			select.builder.append(query.build()).append(" ").append(operator).append(" ");
+			select.bindings.addAll(query.bindings);
+			return select;
+		}
+
+		public Select select(String... columns){
+			return select(false, columns);
+		}
+
+		public Values selectValues(Object... values){
+			Values nextValues = new Values().values(values);
+			nextValues.builder.append(query.build()).append(" ").append(operator).append(" ");
+			nextValues.bindings.addAll(query.bindings);
+			return nextValues;
+		}
+
+		public Values selectValues(Query... values){
+			Values nextValues = new Values().values(values);
+			nextValues.builder.append(query.build()).append(" ").append(operator).append(" ");
+			nextValues.bindings.addAll(query.bindings);
+			return nextValues;
+		}
+	}
+
     public static class GroupBy extends OrderBy{
         private GroupBy(){}
+
+		public Compound union(){
+			return new Compound(this, Compound.UNION);
+		}
+
+		public Compound unionAll(){
+			return new Compound(this, Compound.UNION_ALL);
+		}
+
+		public Compound intersect(){
+			return new Compound(this, Compound.INTERSECT);
+		}
+
+		public Compound except(){
+			return new Compound(this, Compound.EXCEXPT);
+		}
 
         public OrderBy orderBy(String... terms){
             if(terms != null && terms.length > 0){
@@ -182,15 +305,10 @@ public class Query extends SQL{
             return this;
         }
 
-        public OrderBy orderByAsc(String column){
-            builder.append("ORDER BY ").append(column).append(" ").append("ASC ");
-            return this;
-        }
-
-        public OrderBy orderByDesc(String column){
-            builder.append("ORDER BY ").append(column).append(" ").append("DESC ");
-            return this;
-        }
+        public OrderBy orderBy(String column, Order order){
+			builder.append("ORDER BY ").append(column).append(" ").append(order.name()).append(" ");
+			return this;
+		}
     }
 
     public static class OrderBy extends Query{

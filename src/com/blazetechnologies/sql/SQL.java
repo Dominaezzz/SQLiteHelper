@@ -21,14 +21,19 @@ public class SQL {
 	}
 
 	public String build(){
-		return builder.toString();
+		return builder.toString().trim();
+	}
+
+	@Override
+	public String toString() {
+		return build();
 	}
 
 	public ArrayList<Object> getBindings(){
 		return bindings;
 	}
 
-	public static SQL raw(String... strings){
+	protected static SQL raw(String... strings){
 		SQL sql = new SQL();
 		for (String string : strings){
 			sql.builder.append(string);

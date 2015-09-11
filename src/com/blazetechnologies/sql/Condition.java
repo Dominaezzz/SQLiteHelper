@@ -10,14 +10,32 @@ public final class Condition {
 
     private static Class[] classes = new Class[]{
             Byte.TYPE,
+            Byte.class,
+
             Short.TYPE,
+			Short.class,
+
             Integer.TYPE,
+			Integer.class,
+
             Long.TYPE,
+			Long.class,
+
             Float.TYPE,
+			Float.class,
+
             Double.TYPE,
+			Double.class,
+
             Boolean.TYPE,
+			Boolean.class,
+
             Character.TYPE,
-            Date.class
+			Character.class,
+
+            Date.class,
+
+			String.class
     };
 
     private StringBuilder builder;
