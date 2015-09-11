@@ -21,16 +21,16 @@ public class Main {
 						.where("Artist = 'Lana Del Rey'")
 						.groupBy("Album")
 						.orderBy("Disc ASC")
-						.limit(10, 3).build()
+						.limit(10, 3)
 		);
 
 		System.out.println();
 
 		System.out.println(
-				Condition.col("Artist").eq(2)
+				Expr.col("Artist").eq(2.75)
 						.and(
-								Condition.col("Album artist").gt("lady").and("Genre").notEq("Pop")
-						).build()
+								Expr.col("Album artist").gt("lady").and().col("Genre").notEq("Pop")
+						).or().col("Title").eq("Judas")
 		);
 
 		System.out.println();
@@ -40,8 +40,8 @@ public class Main {
 						ColumnDef.create("Id", DataType.INTEGER, ColumnConstraint.primaryKey(Order.ASC, true)),
 						ColumnDef.create("Name", DataType.TEXT, ColumnConstraint.unique())
 				).constraints(
-						TableConstraint.check(Condition.col("Id").gtEq(0))
-				).build()
+						TableConstraint.check(Expr.col("Id").gtEq(0))
+				)
 		);
 
 		System.out.println();
@@ -52,7 +52,7 @@ public class Main {
 						ColumnDef.create("Name", DataType.TEXT, ColumnConstraint.unique())
 				).constraints(
 						TableConstraint.foreignKey("Name").references("OtherTable", "Staff name")
-				).build()
+				)
 		);
 
 		System.out.println();
@@ -71,7 +71,7 @@ public class Main {
 		System.out.println();
 
 		System.out.println(
-				Create.view("TestView").as(select("Stuff").from(TestEntity.class).where(Condition.col("Id").eq(5))).build()
+				Create.view("TestView").as(select("Stuff").from(TestEntity.class).where(Expr.col("Id").eq(5))).build()
 		);
 
 		System.out.println();
@@ -105,7 +105,7 @@ public class Main {
 		System.out.println(
 				Case.when("Stuff == 'other stuff'").then("more stuff")
 						.when("Stuff = 'Useful stuff'").then("Useful")
-						.when(Condition.col("Stuff").eq("Crap")).then("Crappy stuff")
+						.when(Expr.col("Stuff").eq("Crap")).then("Crappy stuff")
 						.orElse("Unknown stuff")//.end()
 		);
 

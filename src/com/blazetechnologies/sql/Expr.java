@@ -1,7 +1,10 @@
 package com.blazetechnologies.sql;
 
 import com.blazetechnologies.Entity;
+import com.blazetechnologies.Utils;
+import com.blazetechnologies.sql.table.DataType;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -59,6 +62,35 @@ public class Expr extends SQL {
 		return value(value.name());
 	}
 
+	public static Expr value(byte[] value){
+		return value(Utils.bytesToHex(value).toUpperCase());
+	}
+
+	public static <T> Expr value(T value){
+		if(Utils.isSupported(value.getClass())){
+			if(String.class.isInstance(value)){
+				return value(String.class.cast(value));
+			}else if(Date.class.isInstance(value)){
+				return value(Date.class.isInstance(value));
+			}else if(Enum.class.isInstance(value)){
+				return value(Enum.class.cast(value));
+			}else if(Character.TYPE.isInstance(value) || Character.class.isInstance(value)){
+				return value(Character.class.cast(value));
+			}else if(value.getClass().isArray() && value.getClass().getComponentType().isAssignableFrom(byte.class)){
+				return value((byte[]) value);
+			}else{
+				try {
+					return value(Long.parseLong(value.toString()));
+				}catch (Exception e){
+					return value(Number.class.cast(value).doubleValue());
+				}
+			}
+		}else if(Expr.class.isAssignableFrom(value.getClass())){
+			return Expr.class.cast(value);
+		}
+		return null;
+	}
+
 	public static Expr Null(){
 		return new Expr("NULL ");
 	}
@@ -75,50 +107,138 @@ public class Expr extends SQL {
 		return new Expr("CURRENT_DATE ");
 	}
 
-	public Expr isNull(){
-		builder.append("ISNULL ");
+	public static Expr cast(Expr expr, DataType type){
+		return new Expr("CAST(" + expr + " AS " + type.name() + ") ");
+	}
+
+	public static Expr and(Expr x, Expr y){
+		return operate("AND", x, y);
+	}
+
+	public static Expr or(Expr x, Expr y){
+		return operate("OR", x, y);
+	}
+
+	private static Expr operate(String operator, Expr x, Expr y){
+		return new Expr("((" + x + ") " + operator + " (" + y + ")) ");
+	}
+
+	private Expr operate(String name, Expr expr){
+		return operate(this, name, expr);
+	}
+
+	protected Expr operate(Expr delegate, String name, Expr expr){
+		delegate.builder.append(name).append(" ");
+		if(expr != null) {
+			delegate.builder.append(expr).append(" ");
+			delegate.getBindings().addAll(expr.getBindings());
+		}
 		return this;
+	}
+
+	private Expr func(String name, Expr... args){
+		return func(this, name, args);
+	}
+
+	protected Expr func(Expr delegate, String name, Expr... args){
+		delegate.builder.append(name).append("(");
+		for (int x = 0; x < args.length; x++) {
+			delegate.builder.append(args[x]);
+			delegate.getBindings().add(args[x].getBindings());
+			if(x < args.length - 1){
+				delegate.builder.append(", ");
+			}
+		}
+		delegate.builder.append(") ");
+		return this;
+	}
+
+	public Expr and(Expr expr){
+		return func("AND ", expr);
+	}
+
+	public Expr or(Expr expr){
+		return func("OR ", expr);
+	}
+
+	public Joint and(){
+		return new Joint(this, "AND");
+	}
+
+	public Joint or(){
+		return new Joint(this, "OR");
+	}
+
+	public Expr eq(Expr value){
+		return operate("=", value);
+	}
+
+	public <T> Expr eq(T value){
+		return eq(value(value));
+	}
+
+	public Expr notEq(Expr value){
+		return operate("!=", value);
+	}
+
+	public <T> Expr notEq(T value){
+		return notEq(value(value));
+	}
+
+	public Expr gt(Expr value){
+		return operate(">", value);
+	}
+
+	public <T> Expr gt(T value){
+		return gt(value(value));
+	}
+
+	public Expr gtEq(Expr expr){
+		return operate(">=", value(expr));
+	}
+
+	public <T> Expr gtEq(T value){
+		return gtEq(value(value));
+	}
+
+	public Expr lt(Expr value){
+		return operate("<", value);
+	}
+
+	public <T> Expr lt(T value){
+		return lt(value(value));
+	}
+
+	public Expr ltEq(Expr value){
+		return operate("<=", value);
+	}
+
+	public <T> Expr ltEq(T value){
+		return ltEq(value(value));
+	}
+
+	public Expr isNull(){
+		return operate("ISNULL", null);
 	}
 
 	public Expr notNull(){
-		builder.append("NOT NULL ");
-		return this;
+		return operate("NOT NULL", null);
 	}
 
 	public Expr is(Expr expr){
-		builder.append("IS ").append(expr).append(" ");
-		bindings.addAll(expr.bindings);
-		return this;
+		return operate("IS", expr);
 	}
 
 	public Expr isNot(Expr expr){
-		builder.append("IS NOT ").append(expr).append(" ");
-		bindings.addAll(expr.bindings);
-		return this;
+		return operate("IS NOT", expr);
 	}
 
 	public Expr in(Expr... exprs){
-		builder.append("IN(");
-		for (int x = 0; x < exprs.length; x++) {
-			builder.append(exprs[x]);
-			bindings.add(exprs[x].bindings);
-			if(x < exprs.length - 1){
-				builder.append(", ");
-			}
-		}
-		builder.append(") ");
-		return this;
-	}
-
-	public Expr in(Query select_stmt){
-		builder.append("IN(").append(select_stmt).append(") ");
-		bindings.addAll(select_stmt.bindings);
-		return this;
+		return func("IN", exprs);
 	}
 
 	public Expr in(String tableOrView){
-		builder.append("IN ").append(tableOrView).append(" ");
-		return this;
+		return operate("IN", new Expr(tableOrView));
 	}
 
 	public <E extends Entity> Expr in(Class<E> entity){
@@ -126,84 +246,149 @@ public class Expr extends SQL {
 	}
 
 	public Expr notIn(Expr... exprs){
-		builder.append("NOT ");
-		return in(exprs);
-	}
-
-	public Expr notIn(Query select_stmt){
-		builder.append("NOT ");
-		return in(select_stmt);
+		return func("NOT IN", exprs);
 	}
 
 	public Expr notIn(String tableOrView){
-		builder.append("NOT ");
-		return in(tableOrView);
+		return operate("NOT IN", new Expr(tableOrView));
 	}
 
 	public <E extends Entity> Expr notIn(Class<E> entity){
-		builder.append("NOT ");
-		return in(entity);
+		return notIn(Entity.getEntityName(entity));
 	}
 
 	public Expr between(Expr down, Expr up){
-		builder.append("BETWEEN ").append(down).append(" AND ").append(up).append(" ");
-		bindings.addAll(down.bindings);
-		bindings.addAll(up.bindings);
-		return this;
+		return operate("BETWEEN", down).operate("AND", up);
 	}
 
 	public Expr notBetween(Expr down, Expr up){
-		builder.append("NOT ");
-		return between(down, up);
+		return operate("NOT BETWEEN", down).operate("AND", up);
 	}
 
 	public Expr like(Expr expr){
-		builder.append("LIKE ").append(expr).append(" ");
-		bindings.addAll(expr.bindings);
-		return this;
+		return operate("LIKE", expr);
 	}
 
 	public Expr notLike(Expr expr){
-		builder.append("NOT ");
-		return like(expr);
+		return operate("NOT LIKE", expr);
 	}
 
 	public Expr glob(Expr expr){
-		builder.append("GLOB ").append(expr).append(" ");
-		bindings.addAll(expr.bindings);
-		return this;
+		return operate("GLOB", expr);
 	}
 
 	public Expr notGlob(Expr expr){
-		builder.append("NOT ");
-		return glob(expr);
+		return operate("NOT GLOB", expr);
 	}
 
 	public Expr match(Expr expr){
-		builder.append("MATCH ").append(expr).append(" ");
-		bindings.addAll(expr.bindings);
-		return this;
+		return operate("MATCH", expr);
 	}
 
 	public Expr notMatch(Expr expr){
-		builder.append("NOT ");
-		return match(expr);
+		return operate("NOT MATCH", expr);
 	}
 
 	public Expr regex(Expr expr){
-		builder.append("REGEX ").append(expr).append(" ");
-		bindings.addAll(expr.bindings);
-		return this;
+		return operate("REGEX", expr);
 	}
 
 	public Expr notRegex(Expr expr){
-		builder.append("NOT ");
-		return regex(expr);
+		return operate("NOT REGEX", expr);
 	}
 
 	public Expr collate(String collation_name){
-		builder.append("COLLATE ").append(collation_name).append(" ");
-		return this;
+		return operate("COLLATE", new Expr(collation_name));
+	}
+
+	public static class Joint{
+		private Expr expr;
+		private String operator;
+
+		private Joint(Expr a, String operator){
+			this.expr = a;
+			this.operator = operator;
+		}
+
+		public Expr col(String column_name){
+			return new BinaryOperator(expr, operator, Expr.col(column_name));
+		}
+
+		public Expr col(String table_name, String column_name){
+			return new BinaryOperator(expr, operator, Expr.col(table_name, column_name));
+		}
+
+		public <E extends Entity> Expr col(Class<E> table, String column_name){
+			return new BinaryOperator(expr, operator, Expr.col(table, column_name));
+		}
+
+		public Expr value(String string){
+			return new BinaryOperator(expr, operator, Expr.value(string));
+		}
+
+		public Expr value(long number){
+			return new BinaryOperator(expr, operator, Expr.value(number));
+		}
+
+		public Expr value(double number){
+			return new BinaryOperator(expr, operator, Expr.value(number));
+		}
+
+		public Expr value(float number){
+			return new BinaryOperator(expr, operator, Expr.value(number));
+		}
+
+		public Expr value(boolean bool){
+			return new BinaryOperator(expr, operator, Expr.value(bool));
+		}
+
+		public Expr value(char character){
+			return new BinaryOperator(expr, operator, Expr.value(character));
+		}
+
+		public Expr value(Date date){
+			return new BinaryOperator(expr, operator, Expr.value(date));
+		}
+
+		public Expr value(Enum value){
+			return new BinaryOperator(expr, operator, Expr.value(value));
+		}
+
+	}
+
+	public static class BinaryOperator extends Expr{
+		private Expr a;
+		private String operator;
+		private Expr b;
+
+		private BinaryOperator(Expr a, String operator, Expr b){
+			this.a = a;
+			this.operator = operator;
+			this.b = b;
+		}
+
+		@Override
+		protected Expr operate(Expr delegate, String name, Expr expr) {
+			return super.operate(b, name, expr);
+		}
+
+		@Override
+		protected Expr func(Expr delegate, String name, Expr... args) {
+			return super.func(b, name, args);
+		}
+
+		@Override
+		public ArrayList<Object> getBindings() {
+			ArrayList<Object> bindings = new ArrayList<>(a.getBindings().size() + b.getBindings().size());
+			bindings.addAll(a.getBindings());
+			bindings.addAll(b.getBindings());
+			return bindings;
+		}
+
+		@Override
+		public String build() {
+			return a + " " + operator + " " + b;
+		}
 	}
 
 }

@@ -1,7 +1,7 @@
 package com.blazetechnologies.sql.table;
 
-import com.blazetechnologies.sql.Condition;
 import com.blazetechnologies.sql.Create;
+import com.blazetechnologies.sql.Expr;
 
 /**
  * Created by Dominic on 07/09/2015.
@@ -36,7 +36,7 @@ public abstract class TableConstraint {
 		return unique(columns);
 	}
 
-	public static TableConstraint check(Condition condition){
+	public static TableConstraint check(Expr condition){
 		return check(condition.build());
 	}
 

@@ -124,7 +124,7 @@ public class Create extends SQL {
 			return this;
 		}
 
-		public Create where(Condition condition){
+		public Create where(Expr condition){
 			return where(condition.build());
 		}
 	}

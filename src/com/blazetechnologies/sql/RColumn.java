@@ -17,9 +17,9 @@ public class RColumn {
 		bindings = new ArrayList<>();
 	}
 
-	public static RColumn def(Query query, String alias){
+	public static RColumn def(Expr query, String alias){
 		RColumn column = def(query.build(), alias);
-		column.bindings.addAll(query.bindings);
+		column.bindings.addAll(query.getBindings());
 		return column;
 	}
 

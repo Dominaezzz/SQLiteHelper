@@ -55,11 +55,11 @@ public class Insert extends SQL{
 		private Columns(){}
 
 		public Insert stmt(Query query){
-			return stmt(query.build(), query.bindings.toArray());
+			return stmt(query.build(), query.getBindings().toArray());
 		}
 
 		public Insert stmt(String query, Object... args){
-			Collections.addAll(bindings, args);
+			Collections.addAll(getBindings(), args);
 			builder.append(query);
 			return this;
 		}
@@ -87,7 +87,7 @@ public class Insert extends SQL{
 				builder.append("(");
 				for (int x = 0; x < values.length; x++) {
 					builder.append("?");
-					bindings.add(values[x]);
+					getBindings().add(values[x]);
 					if(x < values.length - 1){
 						builder.append(", ");
 					}

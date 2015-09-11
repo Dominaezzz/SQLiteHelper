@@ -1,8 +1,8 @@
 package com.blazetechnologies;
 
 import com.blazetechnologies.annotations.Column;
-import com.blazetechnologies.sql.Condition;
 import com.blazetechnologies.sql.Create;
+import com.blazetechnologies.sql.Expr;
 import com.blazetechnologies.sql.SQL;
 import com.sun.istack.internal.NotNull;
 
@@ -105,7 +105,7 @@ public final class SQLiteDatabase implements Closeable{
 
 	public void execute(String sql, Object... args){
 		select("title", "artist").from(TestEntity.class)
-				.where(Condition.col("title").eq("blue jeans"))
+				.where(Expr.col("title").eq("blue jeans"))
 				.groupBy("artist")
 				.orderBy("artist")
 				.limit(1)

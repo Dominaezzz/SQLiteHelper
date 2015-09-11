@@ -43,7 +43,7 @@ public class Update extends SQL {
 			builder.append("SET ");
 		}
 		builder.append(column).append(" = ").append(expr).append(" ");
-		Collections.addAll(bindings, args);
+		Collections.addAll(getBindings(), args);
 		return this;
 	}
 
@@ -58,17 +58,17 @@ public class Update extends SQL {
 			builder.append("SET ");
 		}
 		builder.append(column).append(" = ? ");
-		bindings.add(arg);
+		getBindings().add(arg);
 		return this;
 	}
 
 	public SQL where(String where, Object... args){
 		builder.append("WHERE ").append(where);
-		Collections.addAll(bindings, args);
+		Collections.addAll(getBindings(), args);
 		return this;
 	}
 
-	public SQL where(Condition condition){
+	public SQL where(Expr condition){
 		return where(condition.build(), condition.getBindings().toArray());
 	}
 

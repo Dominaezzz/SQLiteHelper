@@ -1,5 +1,7 @@
 package com.blazetechnologies.sql;
 
+import java.util.ArrayList;
+
 /**
  * Created by Dominic on 10/09/2015.
  */
@@ -9,18 +11,18 @@ public class Case {
 	}
 
 	public static When when(String expr){
-		return new When(expr);
+		return when(Expr.value(expr));
 	}
 
-	public static When when(Condition condition){
-		return when(condition.build());
+	public static When when(Expr condition){
+		return new When(condition, condition.getBindings());
 	}
 
 	public static class When{
 		private StringBuilder builder;
 		private Then then;
 
-		private When(String expr){
+		private When(Expr expr, ArrayList<Object> bindings){
 			builder = new StringBuilder();
 			builder.append("CASE WHEN ").append(expr).append(" ");
 			then = new Then(this);
@@ -46,7 +48,8 @@ public class Case {
 			return when;
 		}
 
-		public When when(Condition condition){
+		public When when(Expr condition){
+
 			return when(condition.build());
 		}
 

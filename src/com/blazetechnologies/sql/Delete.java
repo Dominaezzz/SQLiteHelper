@@ -18,11 +18,11 @@ public class Delete extends SQL {
 
 	public SQL where(String where, Object... args){
 		builder.append(" WHERE ").append(where);
-		Collections.addAll(bindings, args);
+		Collections.addAll(getBindings(), args);
 		return this;
 	}
 
-	public SQL where(Condition condition){
+	public SQL where(Expr condition){
 		return where(condition.build(), condition.getBindings().toArray());
 	}
 

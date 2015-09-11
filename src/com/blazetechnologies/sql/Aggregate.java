@@ -1,81 +1,78 @@
 package com.blazetechnologies.sql;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 /**
  * Created by Dominic on 28/08/2015.
  */
 public class Aggregate extends SQL{
 
-    private Aggregate(String name, String query, Object[] bindings){
-        builder = new StringBuilder(name).append('(').append(query).append(')');
-		this.bindings = new ArrayList<>();
-		Collections.addAll(this.bindings, bindings);
+    private Aggregate(boolean distinct, String name, String args){
+		super(name);
+        builder.append('(');
+		if(distinct){
+			builder.append("DISTINCT ");
+		}
+		builder.append(args);
+		builder.append(')');
 	}
 
-    public static Aggregate max(Query query){
-		return max(query.build(), query.bindings.toArray());
+    public static Aggregate max(String column_name){
+		return new Aggregate(false, "MAX", column_name);
 	}
 
-	public static Aggregate max(String expr, Object... bindings){
-		return new Aggregate("MAX", expr, bindings);
+	public static Aggregate min(String column_name){
+		return new Aggregate(false, "MIN", column_name);
 	}
 
-	public static Aggregate min(Query query){
-		return min(query.build(), query.bindings.toArray());
+	public static Aggregate group_concat(String column_name){
+		return group_concat(false, column_name);
 	}
 
-	public static Aggregate min(String expr, Object... bindings){
-		return new Aggregate("MIN", expr, bindings);
+	public static Aggregate group_concat(boolean distinct, String column_name){
+		return new Aggregate(distinct, "GROUP_CONCAT", column_name);
 	}
 
-	public static Aggregate group_concat(Query query){
-		return group_concat(query.build(), query.bindings.toArray());
+	public static Aggregate group_concat(String column_name, String sep){
+		return group_concat(false, column_name, sep);
 	}
 
-	public static Aggregate group_concat(String expr, Object... bindings){
-		return new Aggregate("GROUP_CONCAT", expr, bindings);
+	public static Aggregate group_concat(boolean distinct, String column_name, String sep){
+		return new Aggregate(distinct, "GROUP_CONCAT", column_name + ", " + sep);
 	}
 
-	public static Aggregate group_concat(Query query, String sep){
-		return group_concat(query.build(), sep, query.bindings.toArray());
+	public static Aggregate sum(String column_name){
+		return sum(false, column_name);
 	}
 
-	public static Aggregate group_concat(String expr, String sep, Object... bindings){
-		return new Aggregate("GROUP_CONCAT", expr + ", " + sep, bindings);
+	public static Aggregate sum(boolean distinct, String column_name){
+		return new Aggregate(distinct, "SUM", column_name);
 	}
 
-	public static Aggregate sum(Query query){
-		return sum(query.build(), query.bindings.toArray());
+	public static Aggregate total(String column_name){
+		return total(false, column_name);
 	}
 
-	public static Aggregate sum(String expr, Object... bindings){
-		return new Aggregate("SUM", expr, bindings);
+	public static Aggregate total(boolean distinct, String column_name){
+		return new Aggregate(distinct, "TOTAL", column_name);
 	}
 
-	public static Aggregate total(Query query){
-		return total(query.build(), query.bindings.toArray());
+	public static Aggregate count(){
+		return count("*");
 	}
 
-	public static Aggregate total(String expr, Object... bindings){
-		return new Aggregate("TOTAL", expr, bindings);
+	public static Aggregate count(String column_name){
+		return count(false, column_name);
 	}
 
-	public static Aggregate count(Query query){
-		return count(query.build(), query.bindings.toArray());
+	public static Aggregate count(boolean distinct, String column_name){
+		return new Aggregate(distinct, "COUNT", column_name);
 	}
 
-	public static Aggregate count(String expr, Object... bindings){
-		return new Aggregate("COUNT", expr, bindings);
+	public static Aggregate avg(String column_name){
+		return avg(false, column_name);
 	}
 
-	public static Aggregate avg(Query query){
-		return avg(query.build(), query.bindings.toArray());
-	}
-
-	public static Aggregate avg(String expr, Object... bindings){
-		return new Aggregate("AVG", expr, bindings);
+	public static Aggregate avg(boolean distinct, String column_name){
+		return new Aggregate(distinct, "AVG", column_name);
 	}
 
 }

@@ -15,7 +15,7 @@ public class Core extends Expr {
 		builder.append('(');
 		for (int x = 0; x < arguments.length; x++) {
 			builder.append(arguments[x]);
-			bindings.addAll(arguments[x].bindings);
+			getBindings().addAll(arguments[x].getBindings());
 			if (x < arguments.length - 1) {
 				builder.append(", ");
 			}
@@ -71,12 +71,16 @@ public class Core extends Expr {
 		return new Core("LOWER", expr);
 	}
 
+	public static Core lTrim(Expr expr){
+		return new Core("LTRIM", expr);
+	}
+
 	public static Core lTrim(Expr x, Expr y){
 		return new Core("LTRIM", x, y);
 	}
 
-	public static Core lTrim(Expr expr){
-		return new Core("LTRIM", expr);
+	public static Core lTrim(Expr x, String y){
+		return lTrim(x, Expr.value(y));
 	}
 
 	public static Core max(Expr... exprs){
@@ -182,6 +186,10 @@ public class Core extends Expr {
 		return new Core("RTRIM", x, y);
 	}
 
+	public static Core rTrim(Expr x, String y){
+		return rTrim(x, Expr.value(y));
+	}
+
 	public static Core substr(Expr x, Expr start){
 		return new Core("SUBSTR", x, start);
 	}
@@ -224,6 +232,10 @@ public class Core extends Expr {
 	 * */
 	public static Core trim(Expr x, Expr y){
 		return new Core("TRIM", x, y);
+	}
+
+	public static Core trim(Expr expr, String y){
+		return trim(expr, Expr.value(y));
 	}
 
 	/**

@@ -1,6 +1,6 @@
 package com.blazetechnologies.sql.table;
 
-import com.blazetechnologies.sql.Condition;
+import com.blazetechnologies.sql.Expr;
 import com.blazetechnologies.sql.Order;
 import com.blazetechnologies.sql.Query;
 
@@ -37,7 +37,7 @@ public abstract class ColumnConstraint {
 		return new NotNull();
 	}
 
-	public static ColumnConstraint check(Condition condition){
+	public static ColumnConstraint check(Expr condition){
 		return check(condition.build());
 	}
 

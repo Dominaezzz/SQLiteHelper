@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class SQL {
 
 	protected StringBuilder builder;
-	protected ArrayList<Object> bindings;
+	private ArrayList<Object> bindings;
 
 	protected SQL(){
 		builder = new StringBuilder();

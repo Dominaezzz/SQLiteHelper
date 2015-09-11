@@ -6,9 +6,9 @@ import com.blazetechnologies.Utils;
 /**
  * Created by Dominic on 27/08/2015.
  */
-public class Query extends SQL{
+public class Query extends Expr{
 
-    Query(){}
+    private Query(){}
 
     public static Select select(boolean distinct, String... columns){
         return new Select(distinct, columns);
@@ -37,32 +37,16 @@ public class Query extends SQL{
 			valuesCount = 0;
 		}
 
-		public Values values(Object... values){
-			if(valuesCount > 0){
-				builder.append(", ");
-			}else{
-				builder.append("VALUES ");
+		@SafeVarargs
+		public final <T> Values values(T... values){
+			Expr[] exprs = new Expr[values.length];
+			for (int x = 0; x < values.length; x++) {
+				exprs[x] = value(values[x]);
 			}
-
-			if(valuesCount < 500){
-				builder.append("(");
-				for (int x = 0; x < values.length; x++) {
-					builder.append("?");
-					bindings.add(values[x]);
-					if(x < values.length - 1){
-						builder.append(", ");
-					}
-				}
-				builder.append(")");
-			}else{
-				throw new UnsupportedOperationException("VALUES limit is 500");
-			}
-			builder.append(" ");
-			valuesCount++;
-			return this;
+			return values(exprs);
 		}
 
-		public Values values(Query... values){
+		public Values values(Expr... values){
 			if(valuesCount > 0){
 				builder.append(", ");
 			}else{
@@ -72,8 +56,8 @@ public class Query extends SQL{
 			if(valuesCount < 500){
 				builder.append("(");
 				for (int x = 0; x < values.length; x++) {
-					builder.append(values[x].buildSubQuery());
-					bindings.addAll(values[x].getBindings());
+					builder.append(values[x]);
+					getBindings().addAll(values[x].getBindings());
 					if(x < values.length - 1){
 						builder.append(", ");
 					}
@@ -110,8 +94,8 @@ public class Query extends SQL{
         }
 
         public From from(Query subQuery){
-            bindings.addAll(subQuery.bindings);
-            return from(subQuery.buildSubQuery());
+            getBindings().addAll(subQuery.getBindings());
+            return from(subQuery.build());
         }
 
         public <E extends Entity> From from(Class<E> table){
@@ -148,8 +132,8 @@ public class Query extends SQL{
             return this;
         }
 
-        public Where where(Condition condition){
-            bindings.addAll(condition.getBindings());
+        public Where where(Expr condition){
+            getBindings().addAll(condition.getBindings());
             return where(condition.build());
         }
 
@@ -166,7 +150,7 @@ public class Query extends SQL{
         }
 
         public Join join(Query subQuery, JoinOperator operator){
-            bindings.addAll(subQuery.bindings);
+            getBindings().addAll(subQuery.getBindings());
             return join(subQuery.buildSubQuery(), operator);
         }
 
@@ -217,12 +201,12 @@ public class Query extends SQL{
 
     public static class Having extends GroupBy{
         private Having(Where where){
-            bindings = where.bindings;
             builder = where.builder;
+			getBindings().addAll(where.getBindings());
         }
 
-        public GroupBy having(Condition condition){
-            bindings.addAll(condition.getBindings());
+        public GroupBy having(Expr condition) {
+			getBindings().addAll(condition.getBindings());
             return having(condition.build());
         }
 
@@ -249,7 +233,7 @@ public class Query extends SQL{
 		public Select select(boolean distinct, String... columns){
 			Select select = Query.select(distinct, columns);
 			select.builder.append(query.build()).append(" ").append(operator).append(" ");
-			select.bindings.addAll(query.bindings);
+			select.getBindings().addAll(query.getBindings());
 			return select;
 		}
 
@@ -260,14 +244,14 @@ public class Query extends SQL{
 		public Values selectValues(Object... values){
 			Values nextValues = new Values().values(values);
 			nextValues.builder.append(query.build()).append(" ").append(operator).append(" ");
-			nextValues.bindings.addAll(query.bindings);
+			nextValues.getBindings().addAll(query.getBindings());
 			return nextValues;
 		}
 
-		public Values selectValues(Query... values){
+		public Values selectValues(Expr... values){
 			Values nextValues = new Values().values(values);
 			nextValues.builder.append(query.build()).append(" ").append(operator).append(" ");
-			nextValues.bindings.addAll(query.bindings);
+			nextValues.getBindings().addAll(query.getBindings());
 			return nextValues;
 		}
 	}
@@ -337,8 +321,8 @@ public class Query extends SQL{
             return from;
         }
 
-        public From on(Condition condition){
-            from.bindings.addAll(condition.getBindings());
+        public From on(Expr condition){
+            from.getBindings().addAll(condition.getBindings());
             return on(condition.build());
         }
 
