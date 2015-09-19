@@ -1,7 +1,5 @@
 package com.blazetechnologies;
 
-import com.blazetechnologies.annotations.Table;
-
 import java.util.Date;
 
 /**
@@ -64,12 +62,28 @@ public class Utils {
         return text == null || text.trim().isEmpty();
     }
 
-    public static <E extends Entity> String getTableName(Class<E> table){
-        String name = table.getSimpleName();
-        if(table.isAnnotationPresent(Table.class)){
-            name = table.getAnnotation(Table.class).Name();
-        }
-        return name;
-    }
+    public static String parenthesize(String string){
+		if(string.charAt(0) == '(' && string.charAt(string.length() - 1) == ')'){
+			return string;
+		}else {
+			return "(" + string + ')';
+		}
+	}
+
+	public static StringBuilder parenthesize(StringBuilder stringBuilder){
+		if(stringBuilder.charAt(0) == '(' && stringBuilder.charAt(stringBuilder.length()) == ')'){
+			return stringBuilder;
+		}else {
+			return stringBuilder.insert(0, '(').append(')');
+		}
+	}
+
+    public static String encaseKeyword(String keyword){
+		if(keyword.charAt(0) == '[' && keyword.charAt(keyword.length() - 1) == ']'){
+			return keyword;
+		}else {
+			return '[' + keyword + ']';
+		}
+	}
 
 }

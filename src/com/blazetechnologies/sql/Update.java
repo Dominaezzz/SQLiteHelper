@@ -1,6 +1,7 @@
 package com.blazetechnologies.sql;
 
 import com.blazetechnologies.Entity;
+import com.blazetechnologies.Utils;
 
 import java.util.Collections;
 
@@ -16,7 +17,7 @@ public class Update extends SQL {
 		if(conflict != null){
 			builder.append("OR ").append(conflict.name()).append(" ");
 		}
-		builder.append(table);
+		builder.append(Utils.encaseKeyword(table)).append(" ");
 		setCount = 0;
 	}
 
@@ -36,30 +37,19 @@ public class Update extends SQL {
 		return table(null, table);
 	}
 
-	public Update set(String column, String expr, Object... args){
+	public Update set(String column, Expr expr){
 		if(setCount > 0){
 			builder.append(", ");
 		}else{
 			builder.append("SET ");
 		}
 		builder.append(column).append(" = ").append(expr).append(" ");
-		Collections.addAll(getBindings(), args);
+		getBindings().addAll(expr.getBindings());
 		return this;
 	}
 
-	public Update set(String column, Query query){
-		return set(column, query.build(), query.getBindings().toArray());
-	}
-
-	public Update set(String column, Object arg){
-		if(setCount > 0){
-			builder.append(", ");
-		}else{
-			builder.append("SET ");
-		}
-		builder.append(column).append(" = ? ");
-		getBindings().add(arg);
-		return this;
+	public <T> Update set(String column, T value){
+		return set(column, Expr.value(value));
 	}
 
 	public SQL where(String where, Object... args){
@@ -68,8 +58,9 @@ public class Update extends SQL {
 		return this;
 	}
 
-	public SQL where(Expr condition){
-		return where(condition.build(), condition.getBindings().toArray());
+	public SQL where(Expr expr){
+		getBindings().addAll(expr.getBindings());
+		return where(expr.toString());
 	}
 
 }

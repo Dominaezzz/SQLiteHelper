@@ -23,30 +23,66 @@ public class Core extends Expr {
 		builder.append(") ");
 	}
 
+	/**
+	 * The abs(X) function returns the absolute value of the numeric argument X.
+	 * Abs(X) returns NULL if X is NULL.
+	 * Abs(X) returns 0.0 if X is a string or blob that cannot be converted to a numeric value.
+	 * If X is the integer -9223372036854775808 then abs(X) throws an integer overflow error since there is no equivalent positive 64-bit two complement value.
+	 *
+	 * */
 	public static Core abs(Expr expr) {
 		return new Core("ABS", expr);
 	}
 
+	/**
+	 * The changes() function returns the number of database rows that were changed or inserted or deleted by the most recently completed INSERT, DELETE, or UPDATE statement, exclusive of statements in lower-level triggers.
+	 * The changes() SQL function is a wrapper around the sqlite3_changes() C/C++ function and hence follows the same rules for counting changes.
+	 *
+	 * */
 	public static Core changes() {
 		return new Core("CHANGES");
 	}
 
+	/**
+	 * The coalesce() function returns a copy of its first non-NULL argument, or NULL if all arguments are NULL. Coalesce() must have at least 2 arguments.
+	 * */
 	public static Core coalesce(Expr... exprs) {
 		return new Core("COALESCE", exprs);
 	}
 
+	/**
+	 *  The glob(X,Y) function is equivalent to the expression "Y GLOB X".
+	 *  Note that the X and Y arguments are reversed in the glob() function relative to the infix GLOB operator.
+	 *  If the sqlite3_create_function() interface is used to override the glob(X,Y) function with an alternative implementation then the
+	 *  GLOB operator will invoke the alternative implementation.
+	 * */
 	public static Core glob(Expr x, Expr y) {
 		return new Core("GLOB", x, y);
 	}
 
+	/**
+	 * The ifnull() function returns a copy of its first non-NULL argument, or NULL if both arguments are NULL.
+	 * Ifnull() must have exactly 2 arguments.
+	 * The ifnull() function is equivalent to coalesce() with two arguments.
+	 * */
 	public static Core ifNull(Expr x, Expr y) {
 		return new Core("IFNULL", x, y);
 	}
 
+	/**
+	 * The instr(X,Y) function finds the first occurrence of string Y within string X and returns the number of prior characters plus 1,
+	 * or 0 if Y is nowhere found within X. Or, if X and Y are both BLOBs, then instr(X,Y) returns one more than the number bytes prior to the first occurrence of Y,
+	 * or 0 if Y does not occur anywhere within X.
+	 * If both arguments X and Y to instr(X,Y) are non-NULL and are not BLOBs then both are interpreted as strings.
+	 * If either X or Y are NULL in instr(X,Y) then the result is NULL.
+	 * */
 	public static Core instr(Expr x, Expr y) {
 		return new Core("INSTR", x, y);
 	}
 
+	/**
+	 * The hex() function interprets its argument as a BLOB and returns a string which is the upper-case hexadecimal rendering of the content of that blob.
+	 * */
 	public static Core hex(Expr expr) {
 		return new Core("HEX", expr);
 	}

@@ -41,4 +41,42 @@ public class SQL {
 		return sql;
 	}
 
+	static RColumn def(final String column_name){
+		return new RColumn() {
+			@Override
+			public String getAlias() {
+				return column_name;
+			}
+
+			@Override
+			public Expr getExpr() {
+				return null;
+			}
+
+			@Override
+			public String getStringExpr() {
+				return null;
+			}
+		};
+	}
+
+	static RColumn def(final String expr, final String alias){
+		return new RColumn() {
+			@Override
+			public String getAlias() {
+				return alias;
+			}
+
+			@Override
+			public Expr getExpr() {
+				return null;
+			}
+
+			@Override
+			public String getStringExpr() {
+				return expr;
+			}
+		};
+	}
+
 }

@@ -6,11 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by Dominic on 27/08/2015.
+ * Created by Dominic on 14/09/2015.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface ForeignKey {
-	String table();
-	String column();
+public @interface Unique {
 }

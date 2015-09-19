@@ -2,7 +2,10 @@ package com.blazetechnologies.sql;
 
 import com.blazetechnologies.Entity;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.function.IntFunction;
 
 /**
  * Created by Dominic on 04/09/2015.
@@ -75,7 +78,19 @@ public class Insert extends SQL{
 
 		private Values(){}
 
-		public Values values(Object... values){
+		@SafeVarargs
+		public final <T> Values values(final T... values){
+			Expr[] actualValues = new Expr[values.length];
+			Arrays.setAll(actualValues, new IntFunction<Expr>() {
+				@Override
+				public Expr apply(int value) {
+					return Expr.value(values[value]);
+				}
+			});
+			return values(actualValues);
+		}
+
+		public Values values(Expr... values){
 			if(valuesCount == 0){
 				builder.append("VALUES ");
 			}
@@ -83,22 +98,41 @@ public class Insert extends SQL{
 				builder.append(", ");
 			}
 
-			if(valuesCount < 500){
+			builder.append("(");
+			for (int x = 0; x < values.length; x++) {
+				builder.append(values[x]);
+				getBindings().add(values[x].getBindings());
+				if(x < values.length - 1){
+					builder.append(", ");
+				}
+			}
+			builder.append(") ");
+
+			valuesCount++;
+			return this;
+		}
+
+		public <E extends Entity> Insert values(E... entities) throws IllegalAccessException {
+			Class<?> type = entities.getClass().getComponentType();
+			Field[] fields = type.getDeclaredFields();
+
+			builder.append("VALUES ");
+
+			for (int x = 0; x < entities.length; x++){
 				builder.append("(");
-				for (int x = 0; x < values.length; x++) {
-					builder.append("?");
-					getBindings().add(values[x]);
-					if(x < values.length - 1){
+				for (int y = 0; y < fields.length; y++){
+					builder.append(Expr.value(fields[y].get(entities[x])));
+					if(y < fields.length - 1){
 						builder.append(", ");
 					}
 				}
-				builder.append(")");
-			}else{
-				throw new UnsupportedOperationException("VALUES limit is 500");
+				builder.append(')');
+				if(x < entities.length - 1){
+					builder.append(',');
+				}
+				builder.append(' ');
 			}
-			builder.append(" ");
 
-			valuesCount++;
 			return this;
 		}
 	}

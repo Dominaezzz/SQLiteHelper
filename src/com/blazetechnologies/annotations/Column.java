@@ -12,8 +12,4 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface Column {
     String Name();
-    boolean PrimaryKey() default false;
-    boolean AutoIncrement() default false;
-    boolean Unique() default false;
-    boolean Null() default true;
 }

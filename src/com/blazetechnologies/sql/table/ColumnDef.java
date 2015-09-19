@@ -1,5 +1,7 @@
 package com.blazetechnologies.sql.table;
 
+import com.blazetechnologies.Utils;
+
 import java.util.ArrayList;
 
 /**
@@ -12,7 +14,7 @@ public class ColumnDef {
 	private ArrayList<ColumnConstraint> constraints;
 
 	private ColumnDef(String name, DataType type){
-		this.name = name;
+		this.name = Utils.encaseKeyword(name);
 		this.type = type;
 		constraints = new ArrayList<>();
 	}
