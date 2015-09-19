@@ -54,7 +54,8 @@ public class Create extends SQL {
 
 	public static class Index{
 		StringBuilder builder;
-		Index(boolean unique, String name){
+
+		private Index(boolean unique, String name){
 			builder = new StringBuilder("CREATE ");
 			if(unique){
 				builder.append("UNIQUE ");
@@ -86,31 +87,6 @@ public class Create extends SQL {
 			}
 			builder.append(")");
 			return new Where(builder);
-		}
-	}
-
-	public static class IndexedColumn extends SQL{
-		private IndexedColumn(String name){
-			builder.append(name).append(" ");
-		}
-
-		public static IndexedColumn name(String name){
-			return new IndexedColumn(name);
-		}
-
-		public IndexedColumn collate(String collation_name){
-			builder.append("COLLATE ").append(collation_name).append(" ");
-			return this;
-		}
-
-		public IndexedColumn asc(){
-			builder.append("ASC");
-			return this;
-		}
-
-		public IndexedColumn desc(){
-			builder.append("DESC");
-			return this;
 		}
 	}
 

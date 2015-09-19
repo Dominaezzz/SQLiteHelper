@@ -23,11 +23,11 @@ public class Expr extends SQL implements RColumn{
 	}
 
 	public static Expr col(String column_name){
-		return new Expr("[" + column_name + "] ");
+		return new Expr(Utils.encaseKeyword(column_name));
 	}
 
 	public static Expr col(String table_name, String column_name){
-		return col("[" + table_name + "].[" + column_name + "]");
+		return col(Utils.encaseKeyword(table_name) + "." + Utils.encaseKeyword(column_name));
 	}
 
 	public static <E extends Entity> Expr col(Class<E> table, String column_name){
@@ -59,7 +59,7 @@ public class Expr extends SQL implements RColumn{
 	}
 
 	public static Expr value(Date date){
-		return null;
+		return DateTime.date_time(date.getTime()/1000);
 	}
 
 	public static Expr value(Enum value){
@@ -96,7 +96,7 @@ public class Expr extends SQL implements RColumn{
 	}
 
 	public static <T> Expr bind(T value){
-		Expr expr = new Expr("? ");
+		Expr expr = bind();
 		expr.getBindings().add(value);
 		return expr;
 	}
@@ -165,6 +165,10 @@ public class Expr extends SQL implements RColumn{
 		}
 		delegate.builder.append(") ");
 		return this;
+	}
+
+	public Expr castTo(DataType type){
+		return cast(this, type);
 	}
 
 	public Expr and(Expr expr){

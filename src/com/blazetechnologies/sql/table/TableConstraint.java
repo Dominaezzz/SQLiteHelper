@@ -1,8 +1,8 @@
 package com.blazetechnologies.sql.table;
 
 import com.blazetechnologies.Utils;
-import com.blazetechnologies.sql.Create;
 import com.blazetechnologies.sql.Expr;
+import com.blazetechnologies.sql.IndexedColumn;
 
 /**
  * Created by Dominic on 07/09/2015.
@@ -17,7 +17,7 @@ public abstract class TableConstraint {
 		return new PrimaryKey(columns);
 	}
 
-	public static TableConstraint primaryKey(Create.IndexedColumn... indexedColumns){
+	public static TableConstraint primaryKey(IndexedColumn... indexedColumns){
 		String[] columns = new String[indexedColumns.length];
 		for (int x = 0; x < indexedColumns.length; x++) {
 			columns[x] = indexedColumns[x].build();
@@ -29,7 +29,7 @@ public abstract class TableConstraint {
 		return new Unique(columns);
 	}
 
-	public static TableConstraint unique(Create.IndexedColumn... indexedColumns){
+	public static TableConstraint unique(IndexedColumn... indexedColumns){
 		String[] columns = new String[indexedColumns.length];
 		for (int x = 0; x < indexedColumns.length; x++) {
 			columns[x] = indexedColumns[x].build();
