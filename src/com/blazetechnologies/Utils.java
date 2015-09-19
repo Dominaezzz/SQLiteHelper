@@ -1,6 +1,7 @@
 package com.blazetechnologies;
 
 import java.util.Date;
+import java.util.Stack;
 
 /**
  * Created by Dominic on 27/08/2015.
@@ -63,7 +64,7 @@ public class Utils {
     }
 
     public static String parenthesize(String string){
-		if(string.charAt(0) == '(' && string.charAt(string.length() - 1) == ')'){
+		if(isWrapped(string)){
 			return string;
 		}else {
 			return "(" + string + ')';
@@ -71,7 +72,7 @@ public class Utils {
 	}
 
 	public static StringBuilder parenthesize(StringBuilder stringBuilder){
-		if(stringBuilder.charAt(0) == '(' && stringBuilder.charAt(stringBuilder.length()) == ')'){
+		if(isWrapped(stringBuilder)){
 			return stringBuilder;
 		}else {
 			return stringBuilder.insert(0, '(').append(')');
@@ -79,11 +80,37 @@ public class Utils {
 	}
 
     public static String encaseKeyword(String keyword){
-		if(keyword.charAt(0) == '[' && keyword.charAt(keyword.length() - 1) == ']'){
+		if(isWrapped(keyword)){
 			return keyword;
 		}else {
 			return '[' + keyword + ']';
 		}
+	}
+
+    private static boolean isWrapped(CharSequence sequence){
+		Stack<Character> characterStack = new Stack<>();
+		char b = sequence.charAt(0);
+		char e = sequence.charAt(sequence.length() - 1);
+
+		if((b == '(' && e == ')') || (b == '[' && e == ']')){
+			for (int x = 0; x < sequence.length(); x++) {
+
+				char c = sequence.charAt(x);
+				if(c == '(' || c == '['){
+					characterStack.push(c);
+				}
+				if(c == ')' || c == ']'){
+					characterStack.pop();
+					if(x != sequence.length() - 1 && characterStack.empty()){
+						return false;
+					}
+				}
+			}
+
+			return true;
+		}
+
+		return false;
 	}
 
 }
