@@ -110,7 +110,7 @@ public class Query extends Expr{
             if(distinct){
                 builder.append("DISTINCT ");
             }
-            if(columns == null || columns.length < 1 || columns[0] == null || columns[0].equals("*")){
+            if(columns.length < 1){
                 builder.append("* ");
             }else{
                 for(int x = 0; x < columns.length; x++) {
