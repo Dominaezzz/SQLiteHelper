@@ -1,5 +1,6 @@
 package com.blazetechnologies.sql.table;
 
+import com.blazetechnologies.Utils;
 import com.blazetechnologies.sql.Create;
 import com.blazetechnologies.sql.Expr;
 
@@ -158,7 +159,7 @@ public abstract class TableConstraint {
 			if(foreignColumns.length > 0){
 				builder.append("(");
 				for (int x = 0; x < foreignColumns.length; x++) {
-					builder.append(foreignColumns[x]);
+					builder.append(Utils.encaseKeyword(foreignColumns[x]));
 					if(x < foreignColumns.length - 1){
 						builder.append(", ");
 					}

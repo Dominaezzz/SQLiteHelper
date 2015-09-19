@@ -2,6 +2,7 @@ package com.blazetechnologies.sql;
 
 import com.blazetechnologies.Entity;
 import com.blazetechnologies.Utils;
+import com.sun.istack.internal.NotNull;
 
 /**
  * Created by Dominic on 27/08/2015.
@@ -18,11 +19,46 @@ public class Query extends Expr{
         return select(false, columns);
     }
 
+	public static Select select(boolean distinct, RColumn... rColumns){
+		String[] columns = new String[rColumns.length];
+        StringBuilder stringBuilder = new StringBuilder();
+		for (int x = 0; x < rColumns.length; x++) {
+			RColumn rColumn = rColumns[x];
+			if(rColumn.getExpr() != null){
+				stringBuilder.append(Utils.parenthesize(rColumn.getExpr().toString())).append(" ");
+			}else if(rColumn.getStringExpr() != null){
+				stringBuilder.append(Utils.parenthesize(rColumn.getStringExpr())).append(" ");
+			}else {
+				stringBuilder.append(rColumn.getAlias());
+				columns[x] = stringBuilder.toString();
+				continue;
+			}
+			if(rColumn.getAlias() != null){
+				stringBuilder.append("AS ").append(rColumn.getAlias());
+			}
+			columns[x] = stringBuilder.toString();
+            stringBuilder.delete(0, stringBuilder.length());
+		}
+		return select(distinct, columns);
+	}
+
+	public static Select select(RColumn... rColumns){
+		return select(false, rColumns);
+	}
+
+	public static Select select(boolean distinct){
+		return new Select(distinct, new String[]{"*"});
+	}
+
+	public static Select select(){
+		return select(false);
+	}
+
 	public static Values selectValues(Object... values){
 		return new Values().values(values);
 	}
 
-	public static Values selectValues(Query... values){
+	public static Values selectValues(Expr... values){
 		return new Values().values(values);
 	}
 
@@ -48,34 +84,28 @@ public class Query extends Expr{
 
 		public Values values(Expr... values){
 			if(valuesCount > 0){
+				builder.deleteCharAt(builder.length() - 1);
 				builder.append(", ");
 			}else{
 				builder.append("VALUES ");
 			}
 
-			if(valuesCount < 500){
-				builder.append("(");
-				for (int x = 0; x < values.length; x++) {
-					builder.append(values[x]);
-					getBindings().addAll(values[x].getBindings());
-					if(x < values.length - 1){
-						builder.append(", ");
-					}
+			builder.append("(");
+			for (int x = 0; x < values.length; x++) {
+				builder.append(values[x]);
+				getBindings().addAll(values[x].getBindings());
+				if(x < values.length - 1){
+					builder.append(", ");
 				}
-				builder.append(")");
-			}else{
-				throw new UnsupportedOperationException("VALUES limit is 500");
 			}
-			builder.append(" ");
+			builder.append(") ");
 			valuesCount++;
 			return this;
 		}
 	}
 
     public static class Select extends From{
-        private Select(boolean distinct, String... columns){
-            //builder = new StringBuilder();
-            //bindings = new ArrayList<>();
+        private Select(boolean distinct, String[] columns){
             builder.append("SELECT ");
             if(distinct){
                 builder.append("DISTINCT ");
@@ -99,7 +129,7 @@ public class Query extends Expr{
         }
 
         public <E extends Entity> From from(Class<E> table){
-            return from(Utils.getTableName(table));
+            return from(Entity.getEntityName(table));
         }
 
         public From from(String tableViewOrSubQuery){
@@ -154,30 +184,16 @@ public class Query extends Expr{
             return join(subQuery.buildSubQuery(), operator);
         }
 
-        public Join join(String tableViewOrSubquery, JoinOperator operator){
-            if(operator == null)operator = JoinOperator.NONE;
+        public Join join(String tableViewOrSubquery, @NotNull JoinOperator operator){
             if(operator != JoinOperator.NONE){
-                switch (operator){
-                    case LEFT:
-                        builder.append("LEFT ");
-                        break;
-                    case LEFT_OUTER:
-                        builder.append("LEFT OUTER ");
-                        break;
-                    case INNER:
-                        builder.append("INNER ");
-                        break;
-                    case CROSS:
-                        builder.append("CROSS ");
-                        break;
-                }
+				builder.append(operator.toString()).append(" ");
             }
             builder.append("JOIN ").append(tableViewOrSubquery).append(" ");
             return new Join(this);
         }
 
         public <E extends Entity> Join join(Class<E> table, JoinOperator operator){
-            return join(Utils.getTableName(table), operator);
+            return join(Entity.getEntityName(table), operator);
         }
     }
 
@@ -197,6 +213,21 @@ public class Query extends Expr{
             }
             return new Having(this);
         }
+
+		public Having groupBy(Expr... exprs){
+			if(exprs.length > 0){
+				builder.append("GROUP BY ");
+				for (int x = 0; x < exprs.length; x++) {
+					builder.append(exprs[x]);
+					getBindings().addAll(exprs[x].getBindings());
+					if(x < exprs.length - 1) {
+						builder.append(", ");
+					}
+				}
+				builder.append(" ");
+			}
+			return new Having(this);
+		}
     }
 
     public static class Having extends GroupBy{
@@ -289,24 +320,51 @@ public class Query extends Expr{
             return this;
         }
 
+        public OrderBy orderBy(Expr... exprs){
+			if(exprs.length > 0){
+				builder.append("ORDER BY ");
+				for (int x = 0; x < exprs.length; x++) {
+					builder.append(exprs[x]);
+					getBindings().add(exprs[x].getBindings());
+					if(x < exprs.length - 1){
+						builder.append(',');
+					}
+					builder.append(' ');
+				}
+			}
+			return this;
+		}
+
         public OrderBy orderBy(String column, Order order){
 			builder.append("ORDER BY ").append(column).append(" ").append(order.name()).append(" ");
 			return this;
-		}
+		}//add order builder
     }
 
     public static class OrderBy extends Query{
         private OrderBy(){}
 
         public Query limit(long limit){
-            return limit(limit, 0);
+            return limit(Expr.value(limit));
         }
 
         public Query limit(long limit, long offset){
-            builder.append("LIMIT ").append(limit).append(" ");
-            builder.append("OFFSET ").append(offset).append(" ");
-            return this;
+            return limit(Expr.value(limit), Expr.value(offset));
         }
+
+		public Query limit(Expr expr){
+			builder.append("LIMIT (").append(expr).append(") ");
+			getBindings().addAll(expr.getBindings());
+			return this;
+		}
+
+		public Query limit(Expr limit, Expr offset){
+			builder.append("LIMIT (").append(limit).append(") ");
+			getBindings().addAll(limit.getBindings());
+			builder.append("OFFSET (").append(offset).append(") ");
+			getBindings().addAll(offset.getBindings());
+			return this;
+		}
     }
 
     public static class Join{
@@ -346,7 +404,16 @@ public class Query extends Expr{
         LEFT,
         LEFT_OUTER,
         INNER,
-        CROSS
-    }
+        CROSS,
+		NATURAL_LEFT,
+		NATURAL_LEFT_OUTER,
+		NATURAL_INNER,
+		NATURAL_CROSS;
+
+		@Override
+		public String toString() {
+			return super.toString().replace('_', ' ');
+		}
+	}
 
 }

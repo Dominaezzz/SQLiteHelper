@@ -5,36 +5,63 @@ import java.util.ArrayList;
 /**
  * Created by Dominic on 10/09/2015.
  */
-public class Case {
+public final class Case {
 
 	private Case(){
 	}
 
 	public static When when(String expr){
-		return when(Expr.value(expr));
+		return when(new Expr(expr));
 	}
 
 	public static When when(Expr condition){
-		return new When(condition, condition.getBindings());
+		return new When(condition);
+	}
+
+	public static class Base{
+		private StringBuilder builder;
+		private ArrayList<Object> bindings;
+
+		private Base(Expr expr){
+			builder = new StringBuilder();
+			bindings = new ArrayList<>(expr.getBindings());
+			builder.append("CASE ").append(expr).append(" WHEN ").append(" ");
+		}
+
+		public When when(String expr){
+			return when(new Expr(expr));
+		}
+
+		public When when(Expr expr){
+			When when = Case.when(expr);
+			builder.append(expr).append(" ");
+			bindings.addAll(expr.getBindings());
+			when.builder = builder;
+			when.bindings = bindings;
+			return when;
+		}
 	}
 
 	public static class When{
 		private StringBuilder builder;
+		private ArrayList<Object> bindings;
 		private Then then;
 
-		private When(Expr expr, ArrayList<Object> bindings){
+		private When(Expr expr){
 			builder = new StringBuilder();
+			bindings = new ArrayList<>(expr.getBindings());
 			builder.append("CASE WHEN ").append(expr).append(" ");
 			then = new Then(this);
 		}
 
 		public Then then(String expr){
 			builder.append("THEN ").append(expr).append(" ");
-			return then;
+			return then(Expr.value(expr));
 		}
 
-		public Then then(Query query){
-			return then(query.build());
+		public Then then(Expr expr){
+			builder.append("THEN ").append(expr).append(" ");
+			return then;
 		}
 	}
 
@@ -49,13 +76,18 @@ public class Case {
 		}
 
 		public When when(Expr condition){
-
+			when.bindings.addAll(condition.getBindings());
 			return when(condition.build());
 		}
 
 		public Else orElse(String expr){
 			when.builder.append("ELSE ").append(expr).append(" ");
 			return this;
+		}
+
+		public Else orElse(Expr expr){
+			when.bindings.addAll(expr.getBindings());
+			return orElse(expr.build());
 		}
 	}
 
@@ -66,9 +98,10 @@ public class Case {
 			this.when = when;
 		}
 
-		public String end(){
-			when.builder.append("END");
-			return when.builder.toString();
+		public Expr end(){
+			Expr expr = new Expr(when.builder.append("END").toString());
+			expr.getBindings().addAll(when.bindings);
+			return expr;
 		}
 	}
 

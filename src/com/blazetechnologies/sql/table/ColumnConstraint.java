@@ -2,7 +2,6 @@ package com.blazetechnologies.sql.table;
 
 import com.blazetechnologies.sql.Expr;
 import com.blazetechnologies.sql.Order;
-import com.blazetechnologies.sql.Query;
 
 /**
  * Created by Dominic on 07/09/2015.
@@ -18,14 +17,14 @@ public abstract class ColumnConstraint {
 	}
 
 	public static ColumnConstraint primaryKey(boolean autoIncrement){
-		return primaryKey(null, autoIncrement);
+		return primaryKey(autoIncrement, null);
 	}
 
 	public static ColumnConstraint primaryKey(Order order){
-		return primaryKey(order, false);
+		return primaryKey(false, order);
 	}
 
-	public static ColumnConstraint primaryKey(Order order, boolean autoIncrement){
+	public static ColumnConstraint primaryKey(boolean autoIncrement, Order order){
 		return new PrimaryKey(order, autoIncrement);
 	}
 
@@ -45,8 +44,8 @@ public abstract class ColumnConstraint {
 		return new Check(condition);
 	}
 
-	public static ColumnConstraint defaultValue(Long signed_number){
-		return new Default(signed_number, null, null);
+	public static <T> ColumnConstraint defaultValue(T value){
+		return defaultValue(Expr.value(value));
 	}
 
 	public static ColumnConstraint defaultValue(String literalValue_or_Query, boolean isQuery){
@@ -56,7 +55,7 @@ public abstract class ColumnConstraint {
 			return new Default(null, literalValue_or_Query, null);
 	}
 
-	public static ColumnConstraint defaultValue(Query query){
+	public static ColumnConstraint defaultValue(Expr query){
 		return new Default(null, null, query.build());
 	}
 

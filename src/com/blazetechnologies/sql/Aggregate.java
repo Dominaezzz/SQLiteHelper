@@ -3,16 +3,30 @@ package com.blazetechnologies.sql;
 /**
  * Created by Dominic on 28/08/2015.
  */
-public class Aggregate extends SQL{
+public class Aggregate extends Expr{
 
-    private Aggregate(boolean distinct, String name, String args){
+    private Aggregate(boolean distinct, String name, String column){
 		super(name);
         builder.append('(');
 		if(distinct){
 			builder.append("DISTINCT ");
 		}
-		builder.append(args);
-		builder.append(')');
+		if(column != null) {
+			builder.append("[").append(column).append("]");
+		}else {
+			builder.append("*");
+		}
+		builder.append(')').append(" ");
+	}
+
+	private Aggregate(boolean distinct, String name, String column, String extra){
+		super(name);
+		builder.append('(');
+		if(distinct){
+			builder.append("DISTINCT ");
+		}
+		builder.append("[").append(column).append("]").append(", ").append(extra);
+		builder.append(')').append(" ");
 	}
 
     public static Aggregate max(String column_name){
@@ -36,7 +50,7 @@ public class Aggregate extends SQL{
 	}
 
 	public static Aggregate group_concat(boolean distinct, String column_name, String sep){
-		return new Aggregate(distinct, "GROUP_CONCAT", column_name + ", " + sep);
+		return new Aggregate(distinct, "GROUP_CONCAT", column_name, sep);
 	}
 
 	public static Aggregate sum(String column_name){
@@ -56,7 +70,7 @@ public class Aggregate extends SQL{
 	}
 
 	public static Aggregate count(){
-		return count("*");
+		return count(null);
 	}
 
 	public static Aggregate count(String column_name){

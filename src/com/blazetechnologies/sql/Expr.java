@@ -5,25 +5,29 @@ import com.blazetechnologies.Utils;
 import com.blazetechnologies.sql.table.DataType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.function.IntFunction;
 
 /**
  * Created by Dominic on 10/09/2015.
  */
-public class Expr extends SQL {
+public class Expr extends SQL implements RColumn{
 
-	Expr(){}
+	private String alias = null;
 
-	Expr(String string){
+	protected Expr(){}
+
+	protected Expr(String string){
 		super(string);
 	}
 
 	public static Expr col(String column_name){
-		return new Expr(column_name + " ");
+		return new Expr("[" + column_name + "] ");
 	}
 
 	public static Expr col(String table_name, String column_name){
-		return col(table_name + "." + column_name);
+		return col("[" + table_name + "].[" + column_name + "]");
 	}
 
 	public static <E extends Entity> Expr col(Class<E> table, String column_name){
@@ -89,6 +93,16 @@ public class Expr extends SQL {
 			return Expr.class.cast(value);
 		}
 		return null;
+	}
+
+	public static <T> Expr bind(T value){
+		Expr expr = new Expr("? ");
+		expr.getBindings().add(value);
+		return expr;
+	}
+
+	public static Expr bind(){
+		return new Expr("? ");
 	}
 
 	public static Expr Null(){
@@ -169,6 +183,66 @@ public class Expr extends SQL {
 		return new Joint(this, "OR");
 	}
 
+	public Joint plus(){
+		return new Joint(this, "+");
+	}
+
+	public Expr plus(Expr expr){
+		return func("+ ", expr);
+	}
+
+	public <T> Expr plus(T value){
+		return plus(Expr.value(value));
+	}
+
+	public Joint minus(){
+		return new Joint(this, "-");
+	}
+
+	public Expr minus(Expr expr){
+		return func("- ", expr);
+	}
+
+	public <T> Expr minus(T value){
+		return minus(Expr.value(value));
+	}
+
+	public Joint multiplyBy(){
+		return new Joint(this, "*");
+	}
+
+	public Expr multiplyBy(Expr expr){
+		return func("* ", expr);
+	}
+
+	public <T> Expr multiplyBy(T value){
+		return multiplyBy(Expr.value(value));
+	}
+
+	public Joint divideBy(){
+		return new Joint(this, "/");
+	}
+
+	public Expr divideBy(Expr expr){
+		return func("/ ", expr);
+	}
+
+	public <T> Expr divideBy(T value){
+		return divideBy(Expr.value(value));
+	}
+
+	public Joint modulus(){
+		return new Joint(this, "%");
+	}
+
+	public Expr modulus(Expr expr){
+		return func("% ", expr);
+	}
+
+	public <T> Expr modulus(T value){
+		return modulus(Expr.value(value));
+	}
+
 	public Expr eq(Expr value){
 		return operate("=", value);
 	}
@@ -229,12 +303,32 @@ public class Expr extends SQL {
 		return operate("IS", expr);
 	}
 
+	public <T> Expr is(T value){
+		return is(Expr.value(value));
+	}
+
 	public Expr isNot(Expr expr){
 		return operate("IS NOT", expr);
 	}
 
+	public <T> Expr isNot(T value){
+		return isNot(Expr.value(value));
+	}
+
 	public Expr in(Expr... exprs){
 		return func("IN", exprs);
+	}
+
+	@SafeVarargs
+	public final <T> Expr in(final T... values){
+		Expr[] exprs = new Expr[values.length];
+		Arrays.setAll(exprs, new IntFunction<Expr>() {
+			@Override
+			public Expr apply(int value) {
+				return Expr.value(values[value]);
+			}
+		});
+		return in(exprs);
 	}
 
 	public Expr in(String tableOrView){
@@ -249,6 +343,18 @@ public class Expr extends SQL {
 		return func("NOT IN", exprs);
 	}
 
+	@SafeVarargs
+	public final <T> Expr notIn(final T... values){
+		Expr[] exprs = new Expr[values.length];
+		Arrays.setAll(exprs, new IntFunction<Expr>() {
+			@Override
+			public Expr apply(int value) {
+				return Expr.value(values[value]);
+			}
+		});
+		return notIn(exprs);
+	}
+
 	public Expr notIn(String tableOrView){
 		return operate("NOT IN", new Expr(tableOrView));
 	}
@@ -261,16 +367,32 @@ public class Expr extends SQL {
 		return operate("BETWEEN", down).operate("AND", up);
 	}
 
+	public <T> Expr between(T down, T up){
+		return between(Expr.value(down), Expr.value(up));
+	}
+
 	public Expr notBetween(Expr down, Expr up){
 		return operate("NOT BETWEEN", down).operate("AND", up);
+	}
+
+	public <T> Expr notBetween(T down, T up){
+		return notBetween(Expr.value(down), Expr.value(up));
 	}
 
 	public Expr like(Expr expr){
 		return operate("LIKE", expr);
 	}
 
+	public Expr like(String expr){
+		return like(Expr.value(expr));
+	}
+
 	public Expr notLike(Expr expr){
 		return operate("NOT LIKE", expr);
+	}
+
+	public Expr notLike(String expr){
+		return notLike(Expr.value(expr));
 	}
 
 	public Expr glob(Expr expr){
@@ -285,20 +407,56 @@ public class Expr extends SQL {
 		return operate("MATCH", expr);
 	}
 
+	public Expr match(String expr){
+		return match(Expr.value(expr));
+	}
+
 	public Expr notMatch(Expr expr){
 		return operate("NOT MATCH", expr);
+	}
+
+	public Expr notMatch(String expr){
+		return notMatch(Expr.value(expr));
 	}
 
 	public Expr regex(Expr expr){
 		return operate("REGEX", expr);
 	}
 
+	public Expr regex(String regex){
+		return regex(Expr.value(regex));
+	}
+
 	public Expr notRegex(Expr expr){
 		return operate("NOT REGEX", expr);
 	}
 
+	public Expr notRegex(String regex){
+		return notRegex(Expr.value(regex));
+	}
+
 	public Expr collate(String collation_name){
 		return operate("COLLATE", new Expr(collation_name));
+	}
+
+	public RColumn as(String alias){
+		this.alias = alias;
+		return this;
+	}
+
+	@Override
+	public String getAlias() {
+		return alias;
+	}
+
+	@Override
+	public Expr getExpr() {
+		return this;
+	}
+
+	@Override
+	public String getStringExpr() {
+		return toString();
 	}
 
 	public static class Joint{
@@ -351,6 +509,14 @@ public class Expr extends SQL {
 		}
 
 		public Expr value(Enum value){
+			return new BinaryOperator(expr, operator, Expr.value(value));
+		}
+
+		public Expr value(byte[] value){
+			return new BinaryOperator(expr, operator, Expr.value(value));
+		}
+
+		public <T> Expr value(T value){
 			return new BinaryOperator(expr, operator, Expr.value(value));
 		}
 

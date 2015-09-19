@@ -1,7 +1,14 @@
 package com.blazetechnologies.sql.table;
 
+import com.blazetechnologies.Entity;
+import com.blazetechnologies.annotations.*;
+import com.blazetechnologies.sql.Order;
 import com.blazetechnologies.sql.Query;
 import com.blazetechnologies.sql.SQL;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by Dominic on 07/09/2015.
@@ -18,6 +25,65 @@ public class Table extends SQL{
 		return create(false, tableName);
 	}
 
+	public static <T extends Entity> SQL create(Class<T> entity){
+		CreateTable createTable = create(Entity.getEntityName(entity));
+
+		Field[] fields = entity.getDeclaredFields();
+		ArrayList<ColumnDef> columnDefs = new ArrayList<>(fields.length);
+
+		for (Field field : fields){
+			if(field.isAnnotationPresent(Ignore.class)){
+				continue;
+			}
+			ColumnDef columnDef = ColumnDef.create(Entity.getEntityFieldName(field), getFieldType(field));
+			if(field.isAnnotationPresent(PrimaryKey.class)){
+				PrimaryKey key = field.getDeclaredAnnotation(PrimaryKey.class);
+				columnDef.addConstraint(ColumnConstraint.primaryKey(key.AutoIncrement(), key.Asc() ? Order.ASC : key.Desc() ? Order.DESC : null));
+			}else {
+				if(field.isAnnotationPresent(Unique.class)){
+					columnDef.addConstraint(ColumnConstraint.unique());
+				}
+				if((field.isAnnotationPresent(NotNull.class) && field.getDeclaredAnnotation(NotNull.class).value()) || field.getType().isPrimitive()){
+					columnDef.addConstraint(ColumnConstraint.notNull());
+				}
+			}
+
+			if(field.isAnnotationPresent(ForeignKey.class)){
+				ForeignKey key = field.getDeclaredAnnotation(ForeignKey.class);
+				columnDef.addConstraint(ColumnConstraint.references(key.table(), key.column()));
+			}
+
+			columnDefs.add(columnDef);
+		}
+
+		return createTable.columns(columnDefs.toArray(new ColumnDef[columnDefs.size()]));
+	}
+
+	private static DataType getFieldType(Field field){
+		Class<?> type = field.getType();
+		if(type.isAssignableFrom(Byte.TYPE)
+				|| type.isAssignableFrom(Byte.class)
+				|| type.isAssignableFrom(Short.TYPE)
+				|| type.isAssignableFrom(Short.class)
+				|| type.isAssignableFrom(Integer.TYPE)
+				|| type.isAssignableFrom(Integer.class)
+				|| type.isAssignableFrom(Long.TYPE)
+				|| type.isAssignableFrom(Long.class)
+				|| type.isAssignableFrom(Date.class)
+				|| type.isAssignableFrom(Boolean.TYPE)
+				|| type.isAssignableFrom(Boolean.class)){
+			return DataType.INTEGER;
+		}else if(type.isAssignableFrom(String.class) || type.isEnum()){
+			return DataType.TEXT;
+		}else if(type.isAssignableFrom(Float.TYPE) || type.isAssignableFrom(Double.TYPE)){
+			return DataType.REAL;
+		}else if(type.isArray() && type.getComponentType().isAssignableFrom(Byte.TYPE)){
+			return DataType.BLOB;
+		}else{
+			return DataType.NONE;
+		}
+	}
+
 	public static AlterTable alter(String tableName){
 		return new AlterTable(tableName);
 	}
@@ -30,11 +96,11 @@ public class Table extends SQL{
 		return new AlterTable(tableName).addColumn(column_def);
 	}
 
-	public static SQL dropOrThrow(String tableName){
+	public static SQL drop(String tableName){
 		return SQL.raw("DROP TABLE [", tableName, "]");
 	}
 
-	public static SQL drop(String tableName){
+	public static SQL dropIfExists(String tableName){
 		return SQL.raw("DROP TABLE IF EXISTS [", tableName, "]");
 	}
 
@@ -46,7 +112,7 @@ public class Table extends SQL{
 		}
 
 		public SQL renameTo(String newTableName){
-			return SQL.raw("ALTER TABLE [", tableName, "] RENAME TO ", newTableName);
+			return SQL.raw("ALTER TABLE [", tableName, "] RENAME TO [", newTableName + "}");
 		}
 
 		public SQL addColumn(String column_def){

@@ -39,7 +39,7 @@ public class Create extends SQL {
 			if(temp){
 				builder.append("TEMPORARY ");
 			}
-			builder.append(name).append(" ");
+			builder.append("VIEW ").append(name).append(" ");
 		}
 
 		public Create as(Query query){
