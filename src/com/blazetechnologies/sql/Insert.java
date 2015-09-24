@@ -43,7 +43,7 @@ public class Insert extends SQL{
 			if(columns.length > 0){
 				builder.append("(");
 				for (int x = 0; x < columns.length; x++) {
-					builder.append(columns[x]);
+					builder.append('[').append(columns[x]).append(']');
 					if(x < columns.length - 1){
 						builder.append(", ");
 					}
@@ -51,6 +51,18 @@ public class Insert extends SQL{
 				builder.append(") ");
 			}
 			return this;
+		}
+
+		public Insert bindColumns(String... columns){
+			columns(columns);
+			Expr[] exprs = new Expr[columns.length];
+			Arrays.setAll(exprs, new IntFunction<Expr>() {
+				@Override
+				public Expr apply(int value) {
+					return Expr.bind();
+				}
+			});
+			return values(exprs);
 		}
 	}
 

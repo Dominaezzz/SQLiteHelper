@@ -36,8 +36,12 @@ Insert.into("TestTable")
 
 The output is...
 ```sql
-INSERT INTO TestTable (Id, Name) 
-VALUES (1, 'Dominic') , (2, 'Fischer') , (3, 'Courtney') , (4, 'Random name') , (5, 'Stuff')
+INSERT INTO TestTable ([Id], [Name]) 
+VALUES (1, 'Dominic') ,
+   (2, 'Fischer') ,
+   (3, 'Courtney') ,
+   (4, 'Random name') ,
+   (5, 'Stuff')
 ```
 
 # Update
@@ -52,9 +56,9 @@ Update.table(TestEntity.class)
 The output is...
 ```sql
 UPDATE [Test Table] 
-SET Id = '4' 
-SET Name = 'Edwin' 
-SET Birthday = date('now', 'start of year', '+7 months') 
+SET [Id] = '4' ,
+[Name] = 'Edwin' ,
+[Birthday] = date('now', 'start of year', '+7 months') 
 WHERE [Stuff] = 'Other stuff'
 ```
 
@@ -93,6 +97,30 @@ CREATE TABLE [TestTable](
     [Name] TEXT UNIQUE, 
     CHECK([Id] >= 0), 
     FOREIGN KEY (Name) REFERENCES OtherTable([Staff name]) ON DELETE CASCADE);
+```
+
+# Create View
+```java
+Create.view("TestView").as(
+   select(
+      col("stuff"),
+      date().startOfMonth().plus(5, DateTime.Mod.DAYS).unixepoch().minus(7),
+      count()
+   )
+   .from(TestEntity.class)
+   .where(
+      col("Id").eq(5).and().col("Date").eq(date())
+   )
+)
+```
+
+The output is...
+```sql
+CREATE VIEW [TestView]
+AS
+SELECT [stuff] , (date('now', 'start of month', '+5 days', 'unixepoch') - (7)) , COUNT(*)
+FROM [Test Table]
+WHERE ([Id] = 5 AND [Date] = date('now'))
 ```
 
 # Alter Table

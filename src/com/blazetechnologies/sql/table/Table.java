@@ -2,6 +2,7 @@ package com.blazetechnologies.sql.table;
 
 import com.blazetechnologies.Entity;
 import com.blazetechnologies.annotations.*;
+import com.blazetechnologies.sql.Expr;
 import com.blazetechnologies.sql.Order;
 import com.blazetechnologies.sql.Query;
 import com.blazetechnologies.sql.SQL;
@@ -46,6 +47,14 @@ public class Table extends SQL{
 				if((field.isAnnotationPresent(NotNull.class) && field.getDeclaredAnnotation(NotNull.class).value()) || field.getType().isPrimitive()){
 					columnDef.addConstraint(ColumnConstraint.notNull());
 				}
+			}
+
+			if(field.isEnumConstant()){
+				columnDef.addConstraint(
+						ColumnConstraint.check(
+								Expr.col(Entity.getEntityFieldName(field)).in(field.getType().getEnumConstants())
+						)
+				);
 			}
 
 			if(field.isAnnotationPresent(ForeignKey.class)){

@@ -33,9 +33,9 @@ public class SQL {
 		return bindings;
 	}
 
-	protected static SQL raw(String... strings){
+	protected static SQL raw(CharSequence... strings){
 		SQL sql = new SQL();
-		for (String string : strings){
+		for (CharSequence string : strings){
 			sql.builder.append(string);
 		}
 		return sql;

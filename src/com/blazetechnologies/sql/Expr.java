@@ -6,6 +6,7 @@ import com.blazetechnologies.sql.table.DataType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.function.IntFunction;
 
@@ -23,11 +24,11 @@ public class Expr extends SQL implements RColumn{
 	}
 
 	public static Expr col(String column_name){
-		return new Expr(Utils.encaseKeyword(column_name));
+		return new Expr(Utils.encaseKeyword(column_name) + " ");
 	}
 
 	public static Expr col(String table_name, String column_name){
-		return col(Utils.encaseKeyword(table_name) + "." + Utils.encaseKeyword(column_name));
+		return new Expr(Utils.encaseKeyword(table_name) + "." + Utils.encaseKeyword(column_name));
 	}
 
 	public static <E extends Entity> Expr col(Class<E> table, String column_name){
@@ -51,7 +52,7 @@ public class Expr extends SQL implements RColumn{
 	}
 
 	public static Expr value(boolean bool){
-		return new Expr((bool? 1 : 0) + " ");
+		return value(bool? 1 : 0);
 	}
 
 	public static Expr value(char character){
@@ -79,7 +80,7 @@ public class Expr extends SQL implements RColumn{
 			}else if(Enum.class.isInstance(value)){
 				return value(Enum.class.cast(value));
 			}else if(Character.TYPE.isInstance(value) || Character.class.isInstance(value)){
-				return value(Character.class.cast(value));
+				return value(Character.class.cast(value).charValue());
 			}else if(value.getClass().isArray() && value.getClass().getComponentType().isAssignableFrom(byte.class)){
 				return value((byte[]) value);
 			}else{
@@ -125,16 +126,27 @@ public class Expr extends SQL implements RColumn{
 		return new Expr("CAST(" + expr + " AS " + type.name() + ") ");
 	}
 
-	public static Expr and(Expr x, Expr y){
-		return operate("AND", x, y);
+	public static Expr and(Expr... exprs){
+		return bin_operate("AND", exprs);
 	}
 
-	public static Expr or(Expr x, Expr y){
-		return operate("OR", x, y);
+	public static Expr or(Expr... exprs){
+		return bin_operate("OR", exprs);
 	}
 
-	private static Expr operate(String operator, Expr x, Expr y){
-		return new Expr("((" + x + ") " + operator + " (" + y + ")) ");
+	private static Expr bin_operate(String operand, Expr[] exprs){
+		Expr result = new Expr("(");
+
+		boolean first = true;
+		for (Expr expr : exprs){
+			result.builder.append('(').append(expr).append(')').append(' ');
+			if(first){
+				result.builder.append(operand).append(' ');
+				first = false;
+			}
+		}
+
+		return result;
 	}
 
 	private Expr operate(String name, Expr expr){
@@ -335,6 +347,10 @@ public class Expr extends SQL implements RColumn{
 		return in(exprs);
 	}
 
+	public <T> Expr in(Collection<T> values){
+		return in(values.toArray());
+	}
+
 	public Expr in(String tableOrView){
 		return operate("IN", new Expr(tableOrView));
 	}
@@ -359,6 +375,10 @@ public class Expr extends SQL implements RColumn{
 		return notIn(exprs);
 	}
 
+	public final <T> Expr notIn(Collection<T> values){
+		return notIn(values.toArray());
+	}
+
 	public Expr notIn(String tableOrView){
 		return operate("NOT IN", new Expr(tableOrView));
 	}
@@ -381,6 +401,30 @@ public class Expr extends SQL implements RColumn{
 
 	public <T> Expr notBetween(T down, T up){
 		return notBetween(Expr.value(down), Expr.value(up));
+	}
+
+	public Expr startsWith(String expr){
+		return like(expr.concat("%"));
+	}
+
+	public Expr endsWith(String expr){
+		return like("%".concat(expr));
+	}
+
+	public Expr contains(String expr){
+		return like("%".concat(expr).concat("%"));
+	}
+
+	public Expr doesNotStartWith(String expr){
+		return notLike(expr.concat("%"));
+	}
+
+	public Expr doesNotEndWith(String expr){
+		return notLike("%".concat(expr));
+	}
+
+	public Expr doesNotContains(String expr){
+		return notLike("%".concat(expr).concat("%"));
 	}
 
 	public Expr like(Expr expr){

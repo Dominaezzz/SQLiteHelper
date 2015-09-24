@@ -16,7 +16,7 @@ public class Aggregate extends Expr{
 		}else {
 			builder.append("*");
 		}
-		builder.append(')').append(" ");
+		builder.append(')').append(' ');
 	}
 
 	private Aggregate(boolean distinct, String name, String column, String extra){

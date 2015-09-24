@@ -92,17 +92,23 @@ public class Utils {
 		char b = sequence.charAt(0);
 		char e = sequence.charAt(sequence.length() - 1);
 
+		boolean hasSpace = false;
+
 		if((b == '(' && e == ')') || (b == '[' && e == ']')){
 			for (int x = 0; x < sequence.length(); x++) {
 
 				char c = sequence.charAt(x);
+				if(c == ' '){
+					hasSpace = true;
+				}
+
 				if(c == '(' || c == '['){
 					characterStack.push(c);
 				}
 				if(c == ')' || c == ']'){
 					characterStack.pop();
 					if(x != sequence.length() - 1 && characterStack.empty()){
-						return false;
+						return !hasSpace;
 					}
 				}
 			}
@@ -110,7 +116,7 @@ public class Utils {
 			return true;
 		}
 
-		return false;
+		return !sequence.toString().contains(" ");
 	}
 
 }

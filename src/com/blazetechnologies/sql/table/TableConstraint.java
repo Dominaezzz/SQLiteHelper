@@ -154,8 +154,7 @@ public abstract class TableConstraint {
 				}
 			}
 			builder.append(") ");
-			builder.append("REFERENCES ");
-			builder.append(foreignTable);
+			builder.append("REFERENCES ").append('[').append(foreignTable).append(']');
 			if(foreignColumns.length > 0){
 				builder.append("(");
 				for (int x = 0; x < foreignColumns.length; x++) {

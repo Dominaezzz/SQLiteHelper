@@ -7,7 +7,7 @@ public class Core extends Expr {
 
 	private Core(String name) {
 		super(name);
-		builder.append("()");
+		builder.append("() ");
 	}
 
 	private Core(String name, Expr... arguments) {
@@ -69,6 +69,10 @@ public class Core extends Expr {
 		return new Core("IFNULL", x, y);
 	}
 
+	public static <T> Core ifNull(Expr x, T y){
+		return ifNull(x, value(y));
+	}
+
 	/**
 	 * The instr(X,Y) function finds the first occurrence of string Y within string X and returns the number of prior characters plus 1,
 	 * or 0 if Y is nowhere found within X. Or, if X and Y are both BLOBs, then instr(X,Y) returns one more than the number bytes prior to the first occurrence of Y,
@@ -78,6 +82,10 @@ public class Core extends Expr {
 	 * */
 	public static Core instr(Expr x, Expr y) {
 		return new Core("INSTR", x, y);
+	}
+
+	public static Core instr(Expr x, String y){
+		return instr(x, value(y));
 	}
 
 	/**
@@ -99,6 +107,10 @@ public class Core extends Expr {
 		return new Core("LIKE", x, y);
 	}
 
+	public static Core like(String column, Expr y){
+		return like(col(column), y);
+	}
+
 	public static Core like(Expr x, Expr y, Expr z) {
 		return new Core("LIKE", x, y, z);
 	}
@@ -107,8 +119,16 @@ public class Core extends Expr {
 		return new Core("LOWER", expr);
 	}
 
+	public static Core lower(String column){
+		return lower(col(column));
+	}
+
 	public static Core lTrim(Expr expr){
 		return new Core("LTRIM", expr);
+	}
+
+	public static Core lTrim(String column){
+		return lTrim(col(column));
 	}
 
 	public static Core lTrim(Expr x, Expr y){
@@ -117,6 +137,10 @@ public class Core extends Expr {
 
 	public static Core lTrim(Expr x, String y){
 		return lTrim(x, Expr.value(y));
+	}
+
+	public static Core lTrim(String column, String y){
+		return lTrim(col(column), y);
 	}
 
 	public static Core max(Expr... exprs){
@@ -156,6 +180,10 @@ public class Core extends Expr {
 		exprs[0] = format;
 		System.arraycopy(args, 0, exprs, 1, args.length);
 		return new Core("PRINTF", exprs);
+	}
+
+	public static Core printF(String format, Expr... args){
+		return printF(value(format), args);
 	}
 
 	/**
@@ -202,12 +230,20 @@ public class Core extends Expr {
 		return replace(x, Expr.value(y), Expr.value(z));
 	}
 
+	public static Core replace(String column, String y, String z){
+		return replace(col(column), y, z);
+	}
+
 	/**
 	 * The round(X,Y) function returns a floating-point value X rounded to Y digits to the right of the decimal point.
 	 * If the Y argument is omitted, it is assumed to be 0.
 	 * */
 	public static Core round(Expr expr){
 		return new Core("ROUND", expr);
+	}
+
+	public static Core round(String column){
+		return round(col(column));
 	}
 
 	/**
@@ -218,6 +254,10 @@ public class Core extends Expr {
 		return new Core("RTRIM", expr);
 	}
 
+	public static Core rTrim(String column){
+		return rTrim(col(column));
+	}
+
 	public static Core rTrim(Expr x, Expr y){
 		return new Core("RTRIM", x, y);
 	}
@@ -226,12 +266,24 @@ public class Core extends Expr {
 		return rTrim(x, Expr.value(y));
 	}
 
+	public static Core rTrim(String column, Expr y){
+		return rTrim(col(column), y);
+	}
+
+	public static Core rTrim(String column, String y){
+		return rTrim(column, value(y));
+	}
+
 	public static Core substr(Expr x, Expr start){
 		return new Core("SUBSTR", x, start);
 	}
 
 	public static Core substr(Expr x, long start){
 		return substr(x, Expr.value(start));
+	}
+
+	public static Core substr(String column, long start){
+		return substr(col(column), start);
 	}
 
 	/**
@@ -250,6 +302,10 @@ public class Core extends Expr {
 		return substr(x, Expr.value(start), Expr.value(length));
 	}
 
+	public static Core substr(String column, long start, long length){
+		return substr(col(column), start, length);
+	}
+
 	/**
 	 * The total_changes() function returns the number of row changes caused by INSERT, UPDATE or DELETE statements since the current database connection was opened.
 	 * This function is a wrapper around the sqlite3_total_changes() C/C++ interface.
@@ -260,6 +316,10 @@ public class Core extends Expr {
 
 	public static Core trim(Expr expr){
 		return new Core("TRIM", expr);
+	}
+
+	public static Core trim(String column){
+		return trim(col(column));
 	}
 
 	/**
@@ -274,6 +334,14 @@ public class Core extends Expr {
 		return trim(expr, Expr.value(y));
 	}
 
+	public static Core trim(String column, Expr y){
+		return trim(col(column), y);
+	}
+
+	public static Core trim(String column, String y){
+		return trim(column, value(y));
+	}
+
 	/**
 	 * The typeof(X) function returns a string that indicates the datatype of the expression X: "null", "integer", "real", "text", or "blob".
 	 * */
@@ -283,6 +351,10 @@ public class Core extends Expr {
 
 	public static Core upper(Expr expr){
 		return new Core("UPPER", expr);
+	}
+
+	public static Core upper(String column){
+		return upper(col(column));
 	}
 
 	public static Core zeroBlob(Expr expr){

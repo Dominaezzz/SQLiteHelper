@@ -17,21 +17,9 @@ public class Main {
 
 	public static void test(){
 		System.out.println(Table.create(TestEntity.class));
-
 		System.out.println();
 
-		System.out.println(
-				select(true, "Title").from(
-						select("Title").from(TestEntity.class)
-								.join(TestEntity.class).on("[First Name]")
-				)
-						.where(col("Artist").eq("Lana Del Rey"))
-						.groupBy("Album")
-						.orderBy("Disc", Order.ASC)
-						.limit(10, 3)
-		);
-
-		System.out.println();
+		selectComplex();
 
 		System.out.println(
 				col("Artist").eq(2.75)
@@ -39,11 +27,49 @@ public class Main {
 								col("Album artist").gt("lady").and().col("Genre").notEq("Pop")
 						)
 						.or()
-						.col("Title").eq("Judas")
+						.col(TestEntity.class, "Title").eq("Judas")
 		);
-
 		System.out.println();
 
+		createTable();
+
+		createTrigger();
+
+		createView();
+
+		insert();
+
+		System.out.println(
+				Table.alter("TestTable").addColumn(ColumnDef.create("Surname", DataType.TEXT))
+		);
+		System.out.println();
+
+		update();
+
+		delete();
+
+		System.out.println(
+				selectValues(
+						2, "Some name"
+				).values(
+						5, "Some other name"
+				).values(
+						8, "Some odd name"
+				).values(
+						9, "Creepy crawly or something"
+				)
+		);
+		System.out.println();
+
+		System.out.println(
+				Case.when("Stuff == 'other stuff'").then("more stuff")
+						.when("Stuff = 'Useful stuff'").then("Useful")
+						.when(col("Stuff").eq("Crap")).then("Crappy stuff")
+						.orElse("Unknown stuff").end()
+		);
+	}
+
+	public static void createTable(){
 		System.out.println(
 				Create.table("TestTable").columns(
 						ColumnDef.create("Id", DataType.INTEGER, ColumnConstraint.primaryKey(true, Order.ASC)),
@@ -53,21 +79,25 @@ public class Main {
 						TableConstraint.foreignKey("Name").references("OtherTable", "Staff name").onDelete(Action.CASCADE)
 				)
 		);
-
 		System.out.println();
+	}
 
+	public static void createTrigger(){
 		System.out.println(
-				Insert.into("TestTable")
-						.columns("Id", "Name")
-						.values(1, "Dominic")
-						.values(2, "Fischer")
-						.values(3, "Courtney")
-						.values(4, "Random name")
-						.values(5, "Stuff")
+				Create.trigger("Test trigger")
+						.after()
+						.delete()
+						.on("TestTable")
+						.forEachRow()
+						.begin(
+								Update.table("TestTable").set("Id", 4).where(col("Id").eq(7))
+						)
+						.end()
 		);
-
 		System.out.println();
+	}
 
+	public static void createView(){
 		System.out.println(
 				Create.view("TestView").as(
 						select(
@@ -81,25 +111,24 @@ public class Main {
 								)
 				)
 		);
-
 		System.out.println();
+	}
 
+	public static void selectComplex(){
 		System.out.println(
-				Table.alter("TestTable").addColumn(ColumnDef.create("Surname", DataType.TEXT))
+				select(true, "Title").from(
+						select("Title").from(TestEntity.class)
+								.join(TestEntity.class).on("[First Name]")
+				)
+						.where(col("Artist").eq("Lana Del Rey"))
+						.groupBy("Album")
+						.orderBy("Disc", Order.ASC)
+						.limit(10, 3)
 		);
-
 		System.out.println();
+	}
 
-		System.out.println(
-				Update.table(TestEntity.class)
-						.set("Id", "4")
-						.set("Name", "Edwin")
-						.set("Birthday", date().startOfYear().plus(7, DateTime.Mod.MONTHS))
-						.where(col("Stuff").eq("Other stuff"))
-		);
-
-		System.out.println();
-
+	public static void delete(){
 		System.out.println(
 				Delete.from("Test Entity")
 						.where(
@@ -108,28 +137,30 @@ public class Main {
 								)
 						)
 		);
-
 		System.out.println();
+	}
 
+	public static void update(){
 		System.out.println(
-				selectValues(
-						2, "Some name"
-				).values(
-						5, "Some other name"
-				).values(
-						8, "Some odd name"
-				).values(
-						9, "Creepy crawly or something"
-				)
+				Update.table(TestEntity.class)
+						.set("Id", "4")
+						.set("Name", "Edwin")
+						.set("Birthday", date().startOfYear().plus(7, DateTime.Mod.MONTHS))
+						.where(col("Stuff").eq("Other stuff"))
 		);
-
 		System.out.println();
+	}
 
+	public static void insert(){
 		System.out.println(
-				Case.when("Stuff == 'other stuff'").then("more stuff")
-						.when("Stuff = 'Useful stuff'").then("Useful")
-						.when(col("Stuff").eq("Crap")).then("Crappy stuff")
-						.orElse("Unknown stuff").end()
+				Insert.into("TestTable")
+						.columns("Id", "Name")
+						.values(1, "Dominic")
+						.values(2, "Fischer")
+						.values(3, "Courtney")
+						.values(4, "Random name")
+						.values(5, "Stuff")
 		);
+		System.out.println();
 	}
 }
