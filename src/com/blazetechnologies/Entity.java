@@ -25,7 +25,7 @@ public abstract class Entity {
     public static String getEntityFieldName(Field field){
 		String name = field.getName();
 		if(field.isAnnotationPresent(Column.class)){
-			name = field.getDeclaredAnnotation(Column.class).Name();
+			name = field.getAnnotation(Column.class).Name();
 		}
 		return name;
 	}

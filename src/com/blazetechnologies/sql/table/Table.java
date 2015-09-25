@@ -38,13 +38,13 @@ public class Table extends SQL{
 			}
 			ColumnDef columnDef = ColumnDef.create(Entity.getEntityFieldName(field), getFieldType(field));
 			if(field.isAnnotationPresent(PrimaryKey.class)){
-				PrimaryKey key = field.getDeclaredAnnotation(PrimaryKey.class);
+				PrimaryKey key = field.getAnnotation(PrimaryKey.class);
 				columnDef.addConstraint(ColumnConstraint.primaryKey(key.AutoIncrement(), key.Asc() ? Order.ASC : key.Desc() ? Order.DESC : null));
 			}else {
 				if(field.isAnnotationPresent(Unique.class)){
 					columnDef.addConstraint(ColumnConstraint.unique());
 				}
-				if((field.isAnnotationPresent(NotNull.class) && field.getDeclaredAnnotation(NotNull.class).value()) || field.getType().isPrimitive()){
+				if((field.isAnnotationPresent(NotNull.class) && field.getAnnotation(NotNull.class).value()) || field.getType().isPrimitive()){
 					columnDef.addConstraint(ColumnConstraint.notNull());
 				}
 			}
@@ -58,7 +58,7 @@ public class Table extends SQL{
 			}
 
 			if(field.isAnnotationPresent(ForeignKey.class)){
-				ForeignKey key = field.getDeclaredAnnotation(ForeignKey.class);
+				ForeignKey key = field.getAnnotation(ForeignKey.class);
 				columnDef.addConstraint(ColumnConstraint.references(key.table(), key.column()));
 			}
 

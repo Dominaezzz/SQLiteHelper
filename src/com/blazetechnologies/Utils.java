@@ -1,5 +1,7 @@
 package com.blazetechnologies;
 
+import com.blazetechnologies.sql.Expr;
+
 import java.util.Date;
 import java.util.Stack;
 
@@ -117,6 +119,14 @@ public class Utils {
 		}
 
 		return !sequence.toString().contains(" ");
+	}
+
+	public static Expr[] valuesToExpressions(Object[] values){
+		Expr[] exprs = new Expr[values.length];
+		for (int x = 0; x < values.length; x++) {
+			exprs[x] = Expr.value(values[x]);
+		}
+		return exprs;
 	}
 
 }

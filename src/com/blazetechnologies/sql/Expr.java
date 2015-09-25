@@ -5,10 +5,8 @@ import com.blazetechnologies.Utils;
 import com.blazetechnologies.sql.table.DataType;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.function.IntFunction;
 
 /**
  * Created by Dominic on 10/09/2015.
@@ -338,12 +336,9 @@ public class Expr extends SQL implements RColumn{
 	@SafeVarargs
 	public final <T> Expr in(final T... values){
 		Expr[] exprs = new Expr[values.length];
-		Arrays.setAll(exprs, new IntFunction<Expr>() {
-			@Override
-			public Expr apply(int value) {
-				return Expr.value(values[value]);
-			}
-		});
+		for (int x = 0; x < values.length; x++) {
+			exprs[x] = Expr.value(values[x]);
+		}
 		return in(exprs);
 	}
 
@@ -366,12 +361,9 @@ public class Expr extends SQL implements RColumn{
 	@SafeVarargs
 	public final <T> Expr notIn(final T... values){
 		Expr[] exprs = new Expr[values.length];
-		Arrays.setAll(exprs, new IntFunction<Expr>() {
-			@Override
-			public Expr apply(int value) {
-				return Expr.value(values[value]);
-			}
-		});
+		for (int x = 0; x < values.length; x++) {
+			exprs[x] = Expr.value(values[x]);
+		}
 		return notIn(exprs);
 	}
 

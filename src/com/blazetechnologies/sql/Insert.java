@@ -1,11 +1,10 @@
 package com.blazetechnologies.sql;
 
 import com.blazetechnologies.Entity;
+import com.blazetechnologies.Utils;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.function.IntFunction;
 
 /**
  * Created by Dominic on 04/09/2015.
@@ -56,12 +55,9 @@ public class Insert extends SQL{
 		public Insert bindColumns(String... columns){
 			columns(columns);
 			Expr[] exprs = new Expr[columns.length];
-			Arrays.setAll(exprs, new IntFunction<Expr>() {
-				@Override
-				public Expr apply(int value) {
-					return Expr.bind();
-				}
-			});
+			for (int x = 0; x < columns.length; x++) {
+				exprs[x] = Expr.bind();
+			}
 			return values(exprs);
 		}
 	}
@@ -91,15 +87,8 @@ public class Insert extends SQL{
 		private Values(){}
 
 		@SafeVarargs
-		public final <T> Values values(final T... values){
-			Expr[] actualValues = new Expr[values.length];
-			Arrays.setAll(actualValues, new IntFunction<Expr>() {
-				@Override
-				public Expr apply(int value) {
-					return Expr.value(values[value]);
-				}
-			});
-			return values(actualValues);
+		public final <T> Values values(T... values){
+			return values(Utils.valuesToExpressions(values));
 		}
 
 		public Values values(Expr... values){
