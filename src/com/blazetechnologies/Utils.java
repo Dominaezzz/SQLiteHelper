@@ -129,4 +129,24 @@ public class Utils {
 		return exprs;
 	}
 
+	public static String escapeString(String string){
+		StringBuilder sqlString = new StringBuilder();
+		sqlString.append('\'');
+
+		if(string.contains("'")){
+			for (int x = 0; x < string.length(); x++) {
+				char c = string.charAt(x);
+				if(c == '\''){
+					sqlString.append('\'');
+				}
+				sqlString.append(c);
+			}
+		}else {
+			sqlString.append(string);
+		}
+
+		sqlString.append('\'');
+		return sqlString.toString();
+	}
+
 }

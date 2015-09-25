@@ -34,7 +34,7 @@ public class Expr extends SQL implements RColumn{
 	}
 
 	public static Expr value(String string){
-		return new Expr("'" + string + "' ");
+		return new Expr(Utils.escapeString(string) + " ");
 	}
 
 	public static Expr value(long number){
@@ -58,7 +58,7 @@ public class Expr extends SQL implements RColumn{
 	}
 
 	public static Expr value(Date date){
-		return DateTime.date_time(date.getTime()/1000);
+		return DateTime.date_time(date.getTime() / 1000);
 	}
 
 	public static Expr value(Enum value){
@@ -73,6 +73,8 @@ public class Expr extends SQL implements RColumn{
 		if(Utils.isSupported(value.getClass())){
 			if(String.class.isInstance(value)){
 				return value(String.class.cast(value));
+			}else if(Boolean.TYPE.isInstance(value) || Boolean.class.isInstance(value)){
+				return value(Boolean.parseBoolean(value.toString()));
 			}else if(Date.class.isInstance(value)){
 				return value(Date.class.isInstance(value));
 			}else if(Enum.class.isInstance(value)){
