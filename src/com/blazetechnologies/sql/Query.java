@@ -2,6 +2,7 @@ package com.blazetechnologies.sql;
 
 import com.blazetechnologies.Entity;
 import com.blazetechnologies.Utils;
+import com.blazetechnologies.executors.Selectable;
 import com.sun.istack.internal.NotNull;
 
 /**
@@ -64,6 +65,10 @@ public class Query extends Expr{
 
     private String buildSubQuery(){
         return "(" + builder.toString() + ")";
+    }
+
+    public <T> T executeQuery(Selectable<T> selectable){
+        return selectable.executeQuery(toString(), getBindings().toArray());
     }
 
 	public static class Values extends GroupBy{

@@ -1,6 +1,6 @@
 package com.blazetechnologies;
 
-import com.blazetechnologies.annotations.Column;
+import com.blazetechnologies.annotations.Field;
 import com.blazetechnologies.annotations.PrimaryKey;
 import com.blazetechnologies.annotations.Table;
 
@@ -12,11 +12,11 @@ import java.util.Date;
 @Table(Name = "Test Table")
 public class TestEntity extends Entity {
 
-    @Column(Name = "Id")
+    @Field(Name = "Id")
     @PrimaryKey(AutoIncrement = true, Asc = true)
     private int _id;
 
-    @Column(Name = "First Name")
+    @Field(Name = "First Name")
     private String firstname;
     private String lastname;
     private Date birthday;

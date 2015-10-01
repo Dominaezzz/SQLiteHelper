@@ -1,5 +1,7 @@
 package com.blazetechnologies.sql;
 
+import com.blazetechnologies.executors.Executable;
+
 import java.util.ArrayList;
 
 /**
@@ -31,6 +33,10 @@ public class SQL {
 
 	public ArrayList<Object> getBindings(){
 		return bindings;
+	}
+
+	public void execute(Executable executable){
+		executable.executeSQL(this.toString(), getBindings().toArray());
 	}
 
 	protected static SQL raw(CharSequence... strings){

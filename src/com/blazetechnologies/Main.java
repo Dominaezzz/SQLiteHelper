@@ -1,6 +1,8 @@
 package com.blazetechnologies;
 
 import com.blazetechnologies.sql.*;
+import com.blazetechnologies.sql.pragma.Pragma;
+import com.blazetechnologies.sql.pragma.Synchronous;
 import com.blazetechnologies.sql.table.*;
 
 import static com.blazetechnologies.sql.Aggregate.count;
@@ -19,7 +21,19 @@ public class Main {
 		System.out.println(Table.create(TestEntity.class));
 		System.out.println();
 
+		createTable();
+
+		createTrigger();
+
+		createView();
+
 		selectComplex();
+
+		insert();
+
+		update();
+
+		delete();
 
 		System.out.println(
 				col("Artist").eq(2.75)
@@ -31,22 +45,10 @@ public class Main {
 		);
 		System.out.println();
 
-		createTable();
-
-		createTrigger();
-
-		createView();
-
-		insert();
-
 		System.out.println(
 				Table.alter("TestTable").addColumn(ColumnDef.create("Surname", DataType.TEXT))
 		);
 		System.out.println();
-
-		update();
-
-		delete();
 
 		System.out.println(
 				selectValues(
@@ -66,6 +68,16 @@ public class Main {
 						.when("Stuff = 'Useful stuff'").then("Useful")
 						.when(col("Stuff").eq("Crap")).then("Crappy stuff")
 						.orElse("Unknown stuff").end()
+		);
+		System.out.println();
+
+		System.out.println(
+				Pragma.foreign_keys(true)
+		);
+		System.out.println();
+
+		System.out.println(
+				Pragma.synchronous(Synchronous.OFF)
 		);
 	}
 

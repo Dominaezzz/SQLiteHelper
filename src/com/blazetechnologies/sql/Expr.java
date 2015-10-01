@@ -37,15 +37,7 @@ public class Expr extends SQL implements RColumn{
 		return new Expr(Utils.escapeString(string) + " ");
 	}
 
-	public static Expr value(long number){
-		return new Expr(number + " ");
-	}
-
-	public static Expr value(double number){
-		return new Expr(number + " ");
-	}
-
-	public static Expr value(float number){
+	public static <T extends Number> Expr value(T number){
 		return new Expr(number + " ");
 	}
 
@@ -53,47 +45,24 @@ public class Expr extends SQL implements RColumn{
 		return value(bool? 1 : 0);
 	}
 
-	public static Expr value(char character){
-		return new Expr("'" + character + "' ");
-	}
-
-	public static Expr value(Date date){
-		return DateTime.date_time(date.getTime() / 1000);
-	}
-
-	public static Expr value(Enum value){
-		return value(value.name());
-	}
-
-	public static Expr value(byte[] value){
-		return value(Utils.bytesToHex(value).toUpperCase());
-	}
-
 	public static <T> Expr value(T value){
-		if(Utils.isSupported(value.getClass())){
-			if(String.class.isInstance(value)){
-				return value(String.class.cast(value));
-			}else if(Boolean.TYPE.isInstance(value) || Boolean.class.isInstance(value)){
-				return value(Boolean.parseBoolean(value.toString()));
-			}else if(Date.class.isInstance(value)){
-				return value(Date.class.isInstance(value));
-			}else if(Enum.class.isInstance(value)){
-				return value(Enum.class.cast(value));
-			}else if(Character.TYPE.isInstance(value) || Character.class.isInstance(value)){
-				return value(Character.class.cast(value).charValue());
-			}else if(value.getClass().isArray() && value.getClass().getComponentType().isAssignableFrom(byte.class)){
-				return value((byte[]) value);
-			}else{
-				try {
-					return value(Long.parseLong(value.toString()));
-				}catch (Exception e){
-					return value(Number.class.cast(value).doubleValue());
-				}
-			}
+		if(Utils.isText(value.getClass())){
+			return value(value.toString());
+		}else if(Utils.isInteger(value.getClass())){
+			return value(Long.parseLong(value.toString()));
+		}else if(Utils.isReal(value.getClass())){
+			return value(Double.parseDouble(value.toString()));
+		}else if(Utils.isBoolean(value.getClass())){
+			return value(Boolean.parseBoolean(value.toString()));
+		}else if(Date.class.isInstance(value)){
+			return DateTime.date_time(((Date) value).getTime() / 1000);
+		}else if(Utils.isBlob(value.getClass())){
+			return value(Utils.bytesToHex((byte[]) value).toUpperCase());
 		}else if(Expr.class.isAssignableFrom(value.getClass())){
 			return Expr.class.cast(value);
+		}else {
+			return null;
 		}
-		return null;
 	}
 
 	public static <T> Expr bind(T value){
@@ -522,46 +491,17 @@ public class Expr extends SQL implements RColumn{
 			return new BinaryOperator(expr, operator, Expr.col(table, column_name));
 		}
 
-		public Expr value(String string){
-			return new BinaryOperator(expr, operator, Expr.value(string));
-		}
-
-		public Expr value(long number){
-			return new BinaryOperator(expr, operator, Expr.value(number));
-		}
-
-		public Expr value(double number){
-			return new BinaryOperator(expr, operator, Expr.value(number));
-		}
-
-		public Expr value(float number){
-			return new BinaryOperator(expr, operator, Expr.value(number));
-		}
-
-		public Expr value(boolean bool){
-			return new BinaryOperator(expr, operator, Expr.value(bool));
-		}
-
-		public Expr value(char character){
-			return new BinaryOperator(expr, operator, Expr.value(character));
-		}
-
-		public Expr value(Date date){
-			return new BinaryOperator(expr, operator, Expr.value(date));
-		}
-
-		public Expr value(Enum value){
-			return new BinaryOperator(expr, operator, Expr.value(value));
-		}
-
-		public Expr value(byte[] value){
-			return new BinaryOperator(expr, operator, Expr.value(value));
-		}
-
 		public <T> Expr value(T value){
 			return new BinaryOperator(expr, operator, Expr.value(value));
 		}
 
+		public Expr bind(){
+			return new BinaryOperator(expr, operator, Expr.bind());
+		}
+
+		public Expr bind(Object object){
+			return new BinaryOperator(expr, operator, Expr.bind(object));
+		}
 	}
 
 	public static class BinaryOperator extends Expr{

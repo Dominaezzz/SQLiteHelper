@@ -2,6 +2,7 @@ package com.blazetechnologies.sql;
 
 import com.blazetechnologies.Entity;
 import com.blazetechnologies.Utils;
+import com.blazetechnologies.executors.Insertable;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
@@ -27,6 +28,10 @@ public class Insert extends SQL{
 
 	public static <E extends Entity> Into into(Class<E> table){
 		return into(null, table);
+	}
+
+	public int execute(Insertable insertable) {
+		return insertable.executeInsert(toString(), getBindings().toArray());
 	}
 
 	public static class Into extends Columns {

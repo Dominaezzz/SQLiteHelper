@@ -4,6 +4,7 @@ import com.blazetechnologies.Entity;
 import com.blazetechnologies.Utils;
 import com.blazetechnologies.annotations.PrimaryKey;
 import com.blazetechnologies.annotations.Unique;
+import com.blazetechnologies.executors.Editable;
 
 import java.lang.reflect.Field;
 import java.util.Collections;
@@ -21,6 +22,10 @@ public class Delete extends SQL {
 
 	public static <E extends Entity> Where from(Class<E> entity){
 		return from(Entity.getEntityName(entity));
+	}
+
+	public int executeDelete(Editable editable){
+		return editable.executeUpdateOrDelete(toString(), getBindings().toArray());
 	}
 
 	public static class Where extends Delete{

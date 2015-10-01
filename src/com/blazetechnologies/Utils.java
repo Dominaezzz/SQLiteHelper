@@ -40,14 +40,68 @@ public class Utils {
             String.class
     };
 
-    public static boolean isSupported(Class<?> type){
-        for (Class sup : classes){
-            if(type.isAssignableFrom(sup)){
-                return true;
-            }
-        }
-        return type.isArray() && type.getComponentType().isAssignableFrom(Byte.TYPE);
-    }
+	private static Class[] integerClasses = new Class[]{
+			Byte.TYPE,
+			Byte.class,
+
+			Short.TYPE,
+			Short.class,
+
+			Integer.TYPE,
+			Integer.class,
+
+			Long.TYPE,
+			Long.class
+	};
+
+	private static Class[] realClasses = new Class[]{
+			Float.TYPE,
+			Float.class,
+			Double.TYPE,
+			Double.class
+	};
+
+	private static Class[] textClasses = new Class[]{
+			Character.TYPE,
+			Character.class,
+			String.class,
+			Enum.class
+	};
+
+	public static boolean isInteger(Class<?> type){
+		for (Class sup : integerClasses){
+			if(type.isAssignableFrom(sup)){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean isReal(Class<?> type){
+		for (Class sup : realClasses){
+			if(type.isAssignableFrom(sup)){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean isText(Class<?> type){
+		for (Class sup : textClasses){
+			if(type.isAssignableFrom(sup)){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean isBoolean(Class<?> type){
+		return type.isAssignableFrom(Boolean.TYPE) || type.isAssignableFrom(Boolean.class);
+	}
+
+	public static boolean isBlob(Class<?> type){
+		return type.isArray() && type.getComponentType().isAssignableFrom(byte.class);
+	}
 
 	final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
 

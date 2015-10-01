@@ -1,9 +1,7 @@
 package com.blazetechnologies;
 
-import com.blazetechnologies.annotations.Column;
+import com.blazetechnologies.annotations.Field;
 import com.blazetechnologies.annotations.Table;
-
-import java.lang.reflect.Field;
 
 /**
  * Created by Dominic on 27/08/2015.
@@ -22,10 +20,10 @@ public abstract class Entity {
         return name;
     }
 
-    public static String getEntityFieldName(Field field){
+    public static String getEntityFieldName(java.lang.reflect.Field field){
 		String name = field.getName();
-		if(field.isAnnotationPresent(Column.class)){
-			name = field.getAnnotation(Column.class).Name();
+		if(field.isAnnotationPresent(Field.class)){
+			name = field.getAnnotation(Field.class).Name();
 		}
 		return name;
 	}

@@ -2,6 +2,7 @@ package com.blazetechnologies.sql;
 
 import com.blazetechnologies.Entity;
 import com.blazetechnologies.Utils;
+import com.blazetechnologies.executors.Editable;
 
 /**
  * Created by Dominic on 07/09/2015.
@@ -24,6 +25,10 @@ public class Update extends SQL {
 
 	public static <E extends Entity> Set table(Class<E> table){
 		return table(null, table);
+	}
+
+	public int executeUpdate(Editable editable){
+		return editable.executeUpdateOrDelete(toString(), getBindings().toArray());
 	}
 
 	public static class Set extends Where{
