@@ -134,3 +134,20 @@ The output is...
 ALTER TABLE [TestTable] ADD COLUMN [Surname] TEXT
 ```
 
+# Statements with parameters
+```java
+Update update = Update.table("TestTable")
+				.set("Name", bind("Michael"))
+				.set("Last Name", bind("Peter"))
+				.set("Birthday", date(System.currentTimeMillis()/1000))
+				.where(col("Id").eq(5));
+		
+ArrayList<Object> bindValues = update.getBindings();
+```
+
+The output is...
+```sql
+UPDATE [TestTable] SET Name = ?, [Last Name] = ?, BirthDay = date(1837293792) WHERE Id = 5
+
+bindValues = [Michael, Peter]
+```

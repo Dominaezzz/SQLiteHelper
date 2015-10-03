@@ -1,7 +1,9 @@
 package com.blazetechnologies.sql;
 
 import com.blazetechnologies.executors.Executable;
+import com.blazetechnologies.executors.JDBCExecutor;
 
+import java.sql.Connection;
 import java.util.ArrayList;
 
 /**
@@ -37,6 +39,10 @@ public class SQL {
 
 	public void execute(Executable executable){
 		executable.executeSQL(this.toString(), getBindings().toArray());
+	}
+
+	public void execute(Connection connection){
+		execute(new JDBCExecutor(connection));
 	}
 
 	protected static SQL raw(CharSequence... strings){

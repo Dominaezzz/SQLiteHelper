@@ -5,6 +5,8 @@ import com.blazetechnologies.sql.pragma.Pragma;
 import com.blazetechnologies.sql.pragma.Synchronous;
 import com.blazetechnologies.sql.table.*;
 
+import java.util.ArrayList;
+
 import static com.blazetechnologies.sql.Aggregate.count;
 import static com.blazetechnologies.sql.DateTime.date;
 import static com.blazetechnologies.sql.Query.*;
@@ -174,5 +176,15 @@ public class Main {
 						.values(5, "Stuff")
 		);
 		System.out.println();
+	}
+
+	public static void parameters(){
+		Update update = Update.table("TestTable")
+				.set("Name", bind("Michael"))
+				.set("Last Name", bind("Peter"))
+				.set("Birthday", date(System.currentTimeMillis()/1000))
+				.where(col("Id").eq(5));
+
+		ArrayList<Object> bindValues = update.getBindings();
 	}
 }

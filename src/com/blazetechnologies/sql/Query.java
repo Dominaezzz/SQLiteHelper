@@ -2,8 +2,12 @@ package com.blazetechnologies.sql;
 
 import com.blazetechnologies.Entity;
 import com.blazetechnologies.Utils;
+import com.blazetechnologies.executors.JDBCExecutor;
 import com.blazetechnologies.executors.Selectable;
 import com.sun.istack.internal.NotNull;
+
+import java.sql.Connection;
+import java.sql.ResultSet;
 
 /**
  * Created by Dominic on 27/08/2015.
@@ -69,6 +73,10 @@ public class Query extends Expr{
 
     public <T> T executeQuery(Selectable<T> selectable){
         return selectable.executeQuery(toString(), getBindings().toArray());
+    }
+
+    public ResultSet executeQuery(Connection connection){
+        return executeQuery(new JDBCExecutor(connection));
     }
 
 	public static class Values extends GroupBy{

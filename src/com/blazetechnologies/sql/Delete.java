@@ -5,8 +5,10 @@ import com.blazetechnologies.Utils;
 import com.blazetechnologies.annotations.PrimaryKey;
 import com.blazetechnologies.annotations.Unique;
 import com.blazetechnologies.executors.Editable;
+import com.blazetechnologies.executors.JDBCExecutor;
 
 import java.lang.reflect.Field;
+import java.sql.Connection;
 import java.util.Collections;
 
 /**
@@ -26,6 +28,10 @@ public class Delete extends SQL {
 
 	public int executeDelete(Editable editable){
 		return editable.executeUpdateOrDelete(toString(), getBindings().toArray());
+	}
+
+	public int executeDelete(Connection connection){
+		return executeDelete(new JDBCExecutor(connection));
 	}
 
 	public static class Where extends Delete{

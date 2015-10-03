@@ -3,8 +3,10 @@ package com.blazetechnologies.sql;
 import com.blazetechnologies.Entity;
 import com.blazetechnologies.Utils;
 import com.blazetechnologies.executors.Insertable;
+import com.blazetechnologies.executors.JDBCExecutor;
 
 import java.lang.reflect.Field;
+import java.sql.Connection;
 import java.util.Collections;
 
 /**
@@ -30,8 +32,12 @@ public class Insert extends SQL{
 		return into(null, table);
 	}
 
-	public int execute(Insertable insertable) {
+	public int executeInsert(Insertable insertable) {
 		return insertable.executeInsert(toString(), getBindings().toArray());
+	}
+
+	public int executeInsert(Connection connection) {
+		return executeInsert(new JDBCExecutor(connection));
 	}
 
 	public static class Into extends Columns {
