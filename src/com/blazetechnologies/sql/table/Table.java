@@ -8,6 +8,7 @@ import com.blazetechnologies.sql.Query;
 import com.blazetechnologies.sql.SQL;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -33,7 +34,7 @@ public class Table extends SQL{
 		ArrayList<ColumnDef> columnDefs = new ArrayList<>(fields.length);
 
 		for (Field field : fields){
-			if(field.isAnnotationPresent(Ignore.class)){
+			if(field.isAnnotationPresent(Ignore.class) || Modifier.isStatic(field.getModifiers())){
 				continue;
 			}
 			ColumnDef columnDef = ColumnDef.create(Entity.getEntityFieldName(field), getFieldType(field));

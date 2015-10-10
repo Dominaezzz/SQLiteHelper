@@ -9,5 +9,5 @@ public interface Insertable {
 	 * @return the row id of the inserted row.
 	 *
 	 * */
-	int executeInsert(String sql, Object[] args);
+	long executeInsert(String sql, Object[] args);
 }

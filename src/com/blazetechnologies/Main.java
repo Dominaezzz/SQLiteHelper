@@ -66,10 +66,11 @@ public class Main {
 		System.out.println();
 
 		System.out.println(
-				Case.when("Stuff == 'other stuff'").then("more stuff")
-						.when("Stuff = 'Useful stuff'").then("Useful")
-						.when(col("Stuff").eq("Crap")).then("Crappy stuff")
-						.orElse("Unknown stuff").end()
+				Case.base("Stuff")
+				.when("OtherStuff", 4)
+				.when("RandomStuff", 5)
+				.when(col("Crap"), 6)
+				.end()
 		);
 		System.out.println();
 

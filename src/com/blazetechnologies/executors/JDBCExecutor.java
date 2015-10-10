@@ -41,7 +41,7 @@ public class JDBCExecutor implements SQLiteWrapper<ResultSet> {
 	}
 
 	@Override
-	public int executeInsert(String sql, Object[] args) {
+	public long executeInsert(String sql, Object[] args) {
 		executeSQL(sql, args);
 		return 0;
 	}

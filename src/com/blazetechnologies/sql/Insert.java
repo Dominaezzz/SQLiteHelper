@@ -32,11 +32,11 @@ public class Insert extends SQL{
 		return into(null, table);
 	}
 
-	public int executeInsert(Insertable insertable) {
+	public long executeInsert(Insertable insertable) {
 		return insertable.executeInsert(toString(), getBindings().toArray());
 	}
 
-	public int executeInsert(Connection connection) {
+	public long executeInsert(Connection connection) {
 		return executeInsert(new JDBCExecutor(connection));
 	}
 

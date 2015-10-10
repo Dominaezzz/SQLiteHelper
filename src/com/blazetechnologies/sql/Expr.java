@@ -67,7 +67,13 @@ public class Expr extends SQL implements RColumn{
 
 	public static <T> Expr bind(T value){
 		Expr expr = bind();
-		expr.getBindings().add(value);
+		if(value instanceof Date){
+			expr.getBindings().add(((Date) value).getTime());
+		}else if(value.getClass().isEnum()){
+			expr.getBindings().add(value.toString());
+		}else {
+			expr.getBindings().add(value);
+		}
 		return expr;
 	}
 
