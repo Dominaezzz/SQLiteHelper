@@ -151,3 +151,16 @@ UPDATE [TestTable] SET Name = ?, [Last Name] = ?, BirthDay = date(1837293792) WH
 
 bindValues = [Michael, Peter]
 ```
+
+# Pragma
+```java
+Pragma.foreign_keys(true);
+Pragma.synchronous(Synchronous.OFF)
+```
+
+The output is...
+```sql
+PRAGMA foreign_keys(true);
+
+PRAGMA synchronous(OFF);
+```

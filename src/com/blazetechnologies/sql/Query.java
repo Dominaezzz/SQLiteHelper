@@ -338,7 +338,7 @@ public class Query extends Expr{
 				builder.append("ORDER BY ");
 				for (int x = 0; x < exprs.length; x++) {
 					builder.append(exprs[x]);
-					getBindings().add(exprs[x].getBindings());
+					getBindings().addAll(exprs[x].getBindings());
 					if(x < exprs.length - 1){
 						builder.append(',');
 					}

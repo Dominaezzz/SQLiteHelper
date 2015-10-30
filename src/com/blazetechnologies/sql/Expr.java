@@ -98,7 +98,9 @@ public class Expr extends SQL implements RColumn{
 	}
 
 	public static Expr cast(Expr expr, DataType type){
-		return new Expr("CAST(" + expr + " AS " + type.name() + ") ");
+		Expr cast_expr = new Expr("CAST(" + expr + " AS " + type.name() + ") ");
+		cast_expr.getBindings().addAll(expr.getBindings());
+		return cast_expr;
 	}
 
 	public static Expr and(Expr... exprs){
@@ -115,6 +117,7 @@ public class Expr extends SQL implements RColumn{
 		boolean first = true;
 		for (Expr expr : exprs){
 			result.builder.append('(').append(expr).append(')').append(' ');
+			result.getBindings().addAll(expr.getBindings());
 			if(first){
 				result.builder.append(operand).append(' ');
 				first = false;
@@ -145,7 +148,7 @@ public class Expr extends SQL implements RColumn{
 		delegate.builder.append(name).append("(");
 		for (int x = 0; x < args.length; x++) {
 			delegate.builder.append(args[x]);
-			delegate.getBindings().add(args[x].getBindings());
+			delegate.getBindings().addAll(args[x].getBindings());
 			if(x < args.length - 1){
 				delegate.builder.append(", ");
 			}
@@ -295,7 +298,7 @@ public class Expr extends SQL implements RColumn{
 	}
 
 	public <T> Expr is(T value){
-		return is(Expr.value(value));
+		return is(value(value));
 	}
 
 	public Expr isNot(Expr expr){
@@ -303,7 +306,7 @@ public class Expr extends SQL implements RColumn{
 	}
 
 	public <T> Expr isNot(T value){
-		return isNot(Expr.value(value));
+		return isNot(value(value));
 	}
 
 	public Expr in(Expr... exprs){
