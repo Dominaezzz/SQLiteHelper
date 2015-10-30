@@ -77,7 +77,9 @@ public class Insert extends SQL{
 		private Columns(){}
 
 		public Insert stmt(Query query){
-			return stmt(query.build(), query.getBindings().toArray());
+			getBindings().addAll(query.getBindings());
+			builder.append(query);
+			return this;
 		}
 
 		public Insert stmt(String query, Object... args){
@@ -124,7 +126,7 @@ public class Insert extends SQL{
 			return this;
 		}
 
-		public <E extends Entity> Insert values(E... entities) throws IllegalAccessException {
+		public <E extends Entity> Insert values(E... entities) {
 			Class<?> type = entities.getClass().getComponentType();
 			Field[] fields = type.getDeclaredFields();
 
@@ -133,7 +135,11 @@ public class Insert extends SQL{
 			for (int x = 0; x < entities.length; x++){
 				builder.append("(");
 				for (int y = 0; y < fields.length; y++){
-					builder.append(Expr.value(fields[y].get(entities[x])));
+					try {
+						builder.append(Expr.value(fields[y].get(entities[x])));
+					} catch (IllegalAccessException e) {
+						e.printStackTrace();
+					}
 					if(y < fields.length - 1){
 						builder.append(", ");
 					}
