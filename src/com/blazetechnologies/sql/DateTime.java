@@ -14,6 +14,7 @@ public class DateTime extends Expr{
 			builder.append('\'').append(format).append('\'').append(", ");
 		}
 		builder.append(time_string).append(") ");
+		getBindings().addAll(time_string.getBindings());
 	}
 
 	public static DateTime date(String time_string){

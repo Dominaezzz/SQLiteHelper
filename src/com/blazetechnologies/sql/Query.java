@@ -8,6 +8,7 @@ import com.sun.istack.internal.NotNull;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 
 /**
  * Created by Dominic on 27/08/2015.
@@ -27,10 +28,12 @@ public class Query extends Expr{
 	public static Select select(boolean distinct, RColumn... rColumns){
 		String[] columns = new String[rColumns.length];
         StringBuilder stringBuilder = new StringBuilder();
+        ArrayList<Object> bindings = new ArrayList<>();
 		for (int x = 0; x < rColumns.length; x++) {
 			RColumn rColumn = rColumns[x];
 			if(rColumn.getExpr() != null){
 				stringBuilder.append(Utils.parenthesize(rColumn.getExpr().toString())).append(" ");
+                bindings.addAll(rColumn.getExpr().getBindings());
 			}else if(rColumn.getStringExpr() != null){
 				stringBuilder.append(Utils.parenthesize(rColumn.getStringExpr())).append(" ");
 			}else {
@@ -44,7 +47,9 @@ public class Query extends Expr{
 			columns[x] = stringBuilder.toString();
             stringBuilder.delete(0, stringBuilder.length());
 		}
-		return select(distinct, columns);
+        Select select = select(distinct, columns);
+        select.getBindings().addAll(bindings);
+        return select;
 	}
 
 	public static Select select(RColumn... rColumns){
@@ -264,7 +269,7 @@ public class Query extends Expr{
 		private static final String UNION = "UNION";
 		private static final String UNION_ALL = "UNION ALL";
 		private static final String INTERSECT = "INTERSECT";
-		private static final String EXCEXPT = "EXCEPT";
+		private static final String EXCEPT = "EXCEPT";
 
 		private Query query;
 		private String operator;
@@ -316,7 +321,7 @@ public class Query extends Expr{
 		}
 
 		public Compound except(){
-			return new Compound(this, Compound.EXCEXPT);
+			return new Compound(this, Compound.EXCEPT);
 		}
 
         public OrderBy orderBy(String... terms){
