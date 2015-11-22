@@ -115,7 +115,7 @@ public class Insert extends SQL{
 			builder.append("(");
 			for (int x = 0; x < values.length; x++) {
 				builder.append(values[x]);
-				getBindings().add(values[x].getBindings());
+				getBindings().addAll(values[x].getBindings());
 				if(x < values.length - 1){
 					builder.append(", ");
 				}
