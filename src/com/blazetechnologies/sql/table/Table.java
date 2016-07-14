@@ -3,7 +3,6 @@ package com.blazetechnologies.sql.table;
 import com.blazetechnologies.Entity;
 import com.blazetechnologies.annotations.*;
 import com.blazetechnologies.sql.Expr;
-import com.blazetechnologies.sql.Order;
 import com.blazetechnologies.sql.Query;
 import com.blazetechnologies.sql.SQL;
 
@@ -40,7 +39,7 @@ public class Table extends SQL{
 			ColumnDef columnDef = ColumnDef.create(Entity.getEntityFieldName(field), getFieldType(field));
 			if(field.isAnnotationPresent(PrimaryKey.class)){
 				PrimaryKey key = field.getAnnotation(PrimaryKey.class);
-				columnDef.addConstraint(ColumnConstraint.primaryKey(key.AutoIncrement(), key.Asc() ? Order.ASC : key.Desc() ? Order.DESC : null));
+				columnDef.addConstraint(ColumnConstraint.primaryKey(key.AutoIncrement(), key.Order()));
 			}else {
 				if(field.isAnnotationPresent(Unique.class)){
 					columnDef.addConstraint(ColumnConstraint.unique());

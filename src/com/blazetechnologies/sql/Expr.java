@@ -97,6 +97,12 @@ public class Expr extends SQL implements RColumn{
 		return new Expr("CURRENT_DATE ");
 	}
 
+	public static Expr wrap(Expr expr){
+		Expr expr1 = new Expr("(" + expr + ")");
+		expr1.getBindings().addAll(expr.getBindings());
+		return expr1;
+	}
+
 	public static Expr cast(Expr expr, DataType type){
 		Expr cast_expr = new Expr("CAST(" + expr + " AS " + type.name() + ") ");
 		cast_expr.getBindings().addAll(expr.getBindings());

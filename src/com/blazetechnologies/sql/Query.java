@@ -281,8 +281,8 @@ public class Query extends Expr{
 
 		public Select select(boolean distinct, String... columns){
 			Select select = Query.select(distinct, columns);
-			select.builder.append(query.build()).append(" ").append(operator).append(" ");
-			select.getBindings().addAll(query.getBindings());
+			select.builder.insert(0, ' ').insert(0, operator).insert(0, ' ').insert(0, query.build());
+			select.getBindings().addAll(0, query.getBindings());
 			return select;
 		}
 
@@ -292,15 +292,15 @@ public class Query extends Expr{
 
 		public Values selectValues(Object... values){
 			Values nextValues = new Values().values(values);
-			nextValues.builder.append(query.build()).append(" ").append(operator).append(" ");
-			nextValues.getBindings().addAll(query.getBindings());
+			nextValues.builder.insert(0, ' ').insert(0, operator).insert(0, ' ').insert(0, query.build());
+			nextValues.getBindings().addAll(0, query.getBindings());
 			return nextValues;
 		}
 
 		public Values selectValues(Expr... values){
 			Values nextValues = new Values().values(values);
-			nextValues.builder.append(query.build()).append(" ").append(operator).append(" ");
-			nextValues.getBindings().addAll(query.getBindings());
+			nextValues.builder.insert(0, ' ').insert(0, operator).insert(0, ' ').insert(0, query.build());
+			nextValues.getBindings().addAll(0, query.getBindings());
 			return nextValues;
 		}
 	}

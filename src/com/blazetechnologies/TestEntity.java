@@ -1,8 +1,9 @@
 package com.blazetechnologies;
 
-import com.blazetechnologies.annotations.Field;
+import com.blazetechnologies.annotations.Column;
 import com.blazetechnologies.annotations.PrimaryKey;
 import com.blazetechnologies.annotations.Table;
+import com.blazetechnologies.sql.Order;
 
 import java.util.Date;
 
@@ -12,15 +13,19 @@ import java.util.Date;
 @Table(Name = "Test Table")
 public class TestEntity extends Entity {
 
-    @Field(Name = "Id")
-    @PrimaryKey(AutoIncrement = true, Asc = true)
+    @Column(Name = "Id")
+    @PrimaryKey(AutoIncrement = true, Order = Order.ASC)
     private int _id;
 
-    @Field(Name = "First Name")
+    @Column(Name = "First Name")
     private String firstname;
+
     private String lastname;
+
     private Date birthday;
+
     private String occupation;
-	private String nationality;
+
+    private String nationality;
 
 }
